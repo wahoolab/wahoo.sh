@@ -64,6 +64,9 @@ if [[ ! -d ${WAHOO}/domains/${WAHOO_DOMAIN} ]]; then
    mkdir -p ${WAHOO}/domains/${WAHOO_DOMAIN}/bin && chmod 700 ${WAHOO}/domains/${WAHOO_DOMAIN}/bin
 fi
 
+DOMAIN_CONFIG_FILE=${WAHOO_HOME}/domains/${WAHOO_DOMAIN}/.wahoo
+LOCAL_CONFIG_FILE=~/.wahoo
+
 # Check if log directory exists and create if it does not.
 [[ ! -d ${WAHOO}/log ]] && mkdir ${WAHOO}/log
 
@@ -104,6 +107,10 @@ WAHOO=\${WAHOO_HOME}
 # This string identifies the group of servers this install is a part of.
 # WAHOO_DOMAIN="acmeco"
 WAHOO_DOMAIN=${WAHOO_DOMAIN}
+
+# Variables to reference the config files. Domain values take precedence over local values.
+LOCAL_CONFIG_FILE=${LOCAL_CONFIG_FILE}
+DOMAIN_CONFIG_FILE=${DOMAIN_CONFIG_FILE}
 
 # 
 PATH=\${WAHOO}/domains/${WAHOO_DOMAIN}/bin:\${WAHOO}/bin:${PATH}
@@ -157,6 +164,9 @@ MESSAGE_SUBJECT_PREFIX="${MESSAGE_SUBJECT_PREFIX}"
 
 # If you forget to clean up your .tmp files in ${TMP} the task can be automated here.
 DELETE_TMP_FILES_AFTER_N_DAYS=${DELETE_TMP_FILES_AFTER_N_DAYS}
+
+# Used for test purposes only.
+WAHOO_TEST=
 
 # You can configure settings for the entire domain in this file. These settings will over-ride the settings
 # in ~/.wahoo.

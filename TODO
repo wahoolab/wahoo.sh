@@ -1,0 +1,30 @@
+To Do List
+
+Created                                                                Completed
+--------------------------------------------------------------------------------
+Most recent at the top.
+
+Nov. 17, 2011
+Make sure that wahoo.sh setup runs automatically anytime a VERSION change event
+is detected and log results or capture results.
+
+Nov. 17, 2011
+Create TiddlyWiki for documentation. Add entry on why I don't like to use
+functions. They don't export well, they are not predictable, they are harder
+to debug.
+
+Nov. 16, 2011
+At this point there is no validation of a PARAMETER name when you run "wahoo.sh
+config". If we allow user defined parms then validation gets a bit complicated
+and I almost rather perform no validation of some sort of "soft" validation and
+not worry about it. What is "soft" validation? Soft validation probably means
+monitoring the parameters and just logging any unknown parameters to the app
+log file every now and then. These "INFO" messages should be reviewed 
+periodically. One other thing to consider is that the config files can be 
+edited manually so that is why we would need some sort of passive monitoring.
+The main thing we want to check for is a typo in a delivered parameter.
+
+Nov. 16, 2011
+Add a variable naming format for .wahoo files which will prevent those 
+parameters from being over-written the next time "wahoo.sh setup" is run.
+

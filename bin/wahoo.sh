@@ -3,67 +3,112 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-# ToDo: Make sure "setup" runs automatically anytime the WAHOO_VERSION changes.
 WAHOO_VERSION=1
 
 function usage {
 cat <<EOF
 $LINE1
-Usage: wahoo.sh [options] [arguments] 
+usage: wahoo.sh [command] [options] [arguments] 
 
-Perform misc. actions within Wahoo.
+General command utility for Wahoo.
 
-Options:
-   "set"
-      Set a parameter in the ~/.wahoo config file.
-      wahoo.sh set SIMPLE_HOST_NAME="dev-db"
-   "setup"
-      Run setup.
-   "version"
+   wahoo.sh setup
+
+      Run Wahoo setup.
+
+   wahoo.sh version
+
       Return Wahoo version number.
 
-Future:
-   "start"
-      Start Wahoo.
-   "stop"
-      Stop Wahoo.
-   "save"
-      Create a backup copy of current Wahoo install.
-   "restore"
-      Restore a backup copy of Wahoo to current install.
+   wahoo.sh config [options] {PARAMETER} "{VALUE}"
+
+      Set or add parameter value, or edit parameter file. If PARAMETER is not
+      specified the config file is opened for direct edits.
+
+      Options:
+
+      --domain              Use domain config file.
+
+      Examples:
+
+      # Edit the LOCAL_CONFIG_FILE (~/.wahoo).
+      wahoo.sh config 
+ 
+      # Edit the DOMAIN_CONFIG_FILE (\${WAHOO}/domains/\${WAHOO_DOMAIN}/.wahoo)
+      wahoo.sh config --domain
+
+      # Set or add parameter "PROD" to "Y" in LOCAL_CONFIG_FILE.
+      wahoo.sh config PROD "Y"
+
+   # Items below this line have not been implemented yet.
+
+   wahoo.sh start
+
+      Start running scheduled tasks.
+
+   wahoo.sh stop 
+
+      Stop running scheduled tasks.
+
+   wahoo.sh save [path]
+
+      Create a backup copy of current Wahoo home. [path] is an optional
+      argument and defaults to the directory above \${WAHOO_HOME}. The 
+      file will be saved as a compressed tarball.
+   
+   wahoo.sh restore [file]    
+
+      Restore a backup copy of Wahoo to current install. [file] is an 
+      optional argument and defaults to the most recently saved tarball if it
+      is not provided.
 
 EOF
 exit 0
 }
 
-(( $# == 0)) && usage
+[[ "${1}" == "--help" ]] && usage
 
 function set_wahoo_parm {
    TEMPFILE=$$.temp
    PARAMETER="${1}"
    VALUE="${2}"
+   (( $(has.sh "space" "${VALUE}") )) && VALUE="\"${VALUE}\""
+   CONFIG_FILE="${3}"
    # Get line # for this parameter.
-   LINE_NUMBER=$(grep -n "^${PARAMETER}=" ~/.wahoo | awk -F":" '{print $1}' | tail -1)
+   LINE_NUMBER=$(grep -n "^${PARAMETER}=" ${CONFIG_FILE} | awk -F":" '{print $1}' | tail -1)
    if [[ -n ${LINE_NUMBER} ]]; then
       (
       ((LINE_NUMBER=LINE_NUMBER-1))
       if (( $LINE_NUMBER > 0 )); then
          # Output up to the previous line number.
-         sed -n "1,${LINE_NUMBER}p" ~/.wahoo
+         sed -n "1,${LINE_NUMBER}p" ${CONFIG_FILE}
       fi
       # Output the new parameter=value string.
       echo "${PARAMETER}=${VALUE}"
       # Output from the next line number to the end of the file.
       ((LINE_NUMBER=LINE_NUMBER+2))
-      sed -n "${LINE_NUMBER},999999p" ~/.wahoo
+      sed -n "${LINE_NUMBER},999999p" ${CONFIG_FILE}
       ) > ${TEMPFILE}
+   else
+      ( echo "# Added on $(date) by wahoo.sh config."
+        echo "${PARAMETER}=${VALUE}" ) >> ${CONFIG_FILE}
    fi
-   [[ -s ${TEMPFILE} ]] && mv ${TEMPFILE} ~/.wahoo
+   [[ -s ${TEMPFILE} ]] && mv ${TEMPFILE} ${CONFIG_FILE}
 }
 
 case ${1} in  
-   "set") 
-      shift; set_wahoo_parm "$(echo $* | cut -d"=" -f1)" "$(echo $* | cut -d"=" -f2)"
+   "config") 
+      shift
+      if [[ "${1}" == "--domain" ]]; then
+          shift; CONFIG_FILE=${DOMAIN_CONFIG_FILE}
+      else
+          CONFIG_FILE=${LOCAL_CONFIG_FILE}
+      fi
+      if [[ -z "${1}" ]]; then
+         vi ${CONFIG_FILE}
+      else
+         set_wahoo_parm "${1}" "${2}" "${CONFIG_FILE}"
+      fi
       ;;
    "setup") 
       if [[ $0 != "wahoo.sh" && $0 != "./wahoo.sh" && $0 != $(pwd)/wahoo.sh ]]; then
@@ -75,7 +120,7 @@ case ${1} in
    "version")
       echo ${WAHOO_VERSION} 
       ;;
-   *) # Option is not recognized. ToDo: Throw error and usage.
+   *) error.sh "$0 - ${1} is not a recognized command. Try \"wahoo.sh --help\"." && exit 1
       ;;
 esac
 
