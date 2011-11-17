@@ -57,7 +57,7 @@ fi
 
 WAHOO_HOME=$(pwd)
 WAHOO=${WAHOO_HOME}
-OSTYPE=$(uname -s | ./bin/uppercase.sh)
+OSTYPE=$(uname -s | ./bin/str.sh ucase)
 
 # Check if domain exists and create if it does not.
 if [[ ! -d ${WAHOO}/domains/${WAHOO_DOMAIN} ]]; then

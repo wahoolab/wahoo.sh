@@ -5,6 +5,11 @@ Created                                                                Completed
 Most recent at the top.
 
 Nov. 17, 2011
+Create script to download and install a NOSQL DB, and then allow option of
+using that as a datastore for cache.sh. Also write other utilities which 
+make use of the NOSQL database easy.
+
+Nov. 17, 2011
 Make sure that wahoo.sh setup runs automatically anytime a VERSION change event
 is detected and log results or capture results.
 

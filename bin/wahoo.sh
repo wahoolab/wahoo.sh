@@ -120,7 +120,7 @@ case ${1} in
    "version")
       echo ${WAHOO_VERSION} 
       ;;
-   *) error.sh "$0 - ${1} is not a recognized command. Try \"wahoo.sh --help\"." && exit 1
+   *) error.sh "$0 - Command ${1} is not recognized. Try \"wahoo.sh --help\"." && exit 1
       ;;
 esac
 
