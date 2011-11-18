@@ -3,7 +3,7 @@
 # Note: ${WAHOO}/domains/${WAHOO_DOMAIN}/bin and ${WAHOO}/bin are added in .wahoo-setup.sh, not here.
 
 (
-echo "${PATH}" | ./bin/split-string.sh
+echo "${PATH}" | ./bin/str.sh split ":"
 cat <<EOF
 .
 /bin

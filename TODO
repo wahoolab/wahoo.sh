@@ -5,6 +5,12 @@ Created                                                                Completed
 Most recent at the top.
 
 Nov. 17, 2011
+Need to add command line options to .wahoo-setup.sh so I can run automated tests
+without being prompted...do I really want to do this or is this a different test
+package that only developers run? Think we need one for all-users and one for
+developers.
+
+Nov. 17, 2011
 Create script to download and install a NOSQL DB, and then allow option of
 using that as a datastore for cache.sh. Also write other utilities which 
 make use of the NOSQL database easy.

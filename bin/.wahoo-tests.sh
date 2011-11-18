@@ -10,11 +10,25 @@ EOF
 }
 
 function success {
-   printf "%-60s%20s\n" "${NAME}" "success"    
+   printf "%-60s%20s\n" "${NAME}" "OK"    
 }
 
 function failure {
-   printf "%-60s%20s\n" "${NAME}" "failed"
+   printf "%-60s%20s\n" "${NAME}" "*FAIL*"
+}
+
+function todo {
+   printf "%-60s%20s\n" "${NAME}" "?"
+}
+
+function check_for_help_option {
+   FILE="${1}"
+   NAME="Check for --help option"
+   if $(grep "\-\-help" "${FILE}" 1> /dev/null); then
+      success
+   else
+      failure
+   fi
 }
 
 now_testing "Configuration Files"
@@ -33,7 +47,31 @@ else
    failure
 fi
 
+now_testing "PATH Variable"
+NAME="${WAHOO}/bin In Path"
+if (( $(echo ${PATH} | egrep "${WAHOO}/bin" | wc -l) )); then
+   success
+else
+   failure
+fi
+
+NAME="${WAHOO}/domains/${WAHOO_DOMAIN}/bin In Path"
+if (( $(echo ${PATH} | egrep "${WAHOO}/domains/${WAHOO_DOMAIN}/bin" | wc -l) )); then
+   success
+else
+   failure
+fi
+
+
 now_testing "wahoo.sh"
+check_for_help_option ${WAHOO}/bin/wahoo.sh
+
+NAME="version returns value"
+if (( $(wahoo.sh version) > 0 )); then
+   success
+else
+   failure
+fi
 
 NAME="Set WAHOO_TEST parameter to Null"
 wahoo.sh config WAHOO_TEST ""
@@ -54,6 +92,8 @@ else
 fi
 
 now_testing "has.sh"
+
+check_for_help_option ${WAHOO}/bin/has.sh
 
 for t in "x x" " x" "x " " "; do
    NAME="Looking for a spaces in \"${t}\""
@@ -92,6 +132,8 @@ for t in "x--x" " " ""; do
 done
 
 now_testing "debug.sh"
+
+check_for_help_option ${WAHOO}/bin/debug.sh
 
 NAME="Writing to default debug.log file"
 WAHOO_DEBUG_LEVEL=3
@@ -136,6 +178,73 @@ for l in 0 1 2 3; do
    done
 done
 
+now_testing "str.sh"
+check_for_help_option ${WAHOO}/bin/str.sh
+
+NAME="String to upper-case"
+TEST="$(echo 'a|][_*@z' | str.sh upper) $(echo 'a|][_*@z' | str.sh ucase)"
+if [[ "${TEST}" == "A|][_*@Z A|][_*@Z" ]]; then
+   success
+else
+   failure
+fi
+
+NAME="String to lower-case"
+TEST="$(echo 'A|][_*@Z' | str.sh lower) $(echo 'A|][_*@Z' | str.sh lcase)"
+if [[ "${TEST}" == "a|][_*@z a|][_*@z" ]]; then
+   success
+else
+   failure
+fi
+
+NAME="Split string a:b:c"
+(
+cat <<EOF
+a
+b
+c
+EOF
+) > /tmp/A$$
+echo "a:b:c" | str.sh split > /tmp/B$$
+if (( $(diff /tmp/A$$ /tmp/B$$ | wc -l) == 0 )); then
+   success
+else
+   failure
+fi
+
+for d in ";" "-" "," "|"; do
+   NAME="Split string a${d}b${d}c"
+   echo "a${d}b${d}c" | str.sh split "${d}" > /tmp/B$$
+   if (( $(diff /tmp/A$$ /tmp/B$$ | wc -l) == 0 )); then
+      success
+   else
+      failure
+   fi
+done
+
+rm /tmp/A$$ /tmp/B$$ 2> /dev/null
+
+now_testing "time.sh"
+check_for_help_option ${WAHOO}/bin/time.sh
+NAME="time.sh epoch" && todo
+NAME="time.sh epoch --hours" && todo
+NAME="time.sh epoch --minutes" && todo
+
+now_testing "cache.sh"
+check_for_help_option ${WAHOO}/bin/cache.sh
+NAME="cache.sh set foo bar" && todo
+NAME="cache.sh get foo" && todo
+NAME="cat foo.txt | cache.sh set foo" && todo
+NAME="cache.sh get foo" && todo
+
+now_testing "error.sh"
+check_for_help_option ${WAHOO}/bin/error.sh
+
+now_testing ".wahoo-setup.sh"
+check_for_help_option ${WAHOO}/bin/.wahoo-setup.sh
+
+now_testing ".wahoo-path.sh"
+check_for_help_option ${WAHOO}/bin/.wahoo-path.sh
 
 
 

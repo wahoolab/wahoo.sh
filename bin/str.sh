@@ -26,6 +26,10 @@ function convert_case {
    echo "${1}"
 }
 
+function split_string {
+   echo "${1}" | tr "${SPLITTER}" "\n"
+}
+
 CONVERSION_FUNCTION=
 case "${1}" in
    "upper"|"ucase") 
@@ -35,6 +39,10 @@ case "${1}" in
    "lower"|"lcase")
       typeset -l INPUT
       CONVERSION_FUNCTION="convert_case"
+      ;;
+   "split")
+      SPLITTER=${2:-":"}
+      CONVERSION_FUNCTION="split_string"
       ;;
 esac
 

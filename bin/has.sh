@@ -1,4 +1,28 @@
 
+function usage {
+cat <<EOF
+$LINE1
+usage: has.sh [option] "[string]"
+
+Misc. "has" functions.
+
+Options:
+
+   "has_option"
+   
+      Checks string for a command line option using the double-dash (--)
+      format. Returns 1 if true, 0 if false.
+
+   "has_option"
+
+      Checks string for a space. Returns 1 if true, 0 if false.
+
+EOF
+exit 0
+}
+
+[[ "${1}" == "--help" ]] && usage
+
 function has_option {
    # Does "${STRING}" contain one or more "--" type options? Returns 1 (true) or 0 (false).
    ARGUMENTS="${1}"
