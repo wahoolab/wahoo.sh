@@ -66,6 +66,8 @@ fi
 now_testing "wahoo.sh"
 check_for_help_option ${WAHOO}/bin/wahoo.sh
 
+NAME="log to wahoo.log" && todo
+
 NAME="version returns value"
 if (( $(wahoo.sh version) > 0 )); then
    success
@@ -246,7 +248,8 @@ check_for_help_option ${WAHOO}/bin/.wahoo-setup.sh
 now_testing ".wahoo-path.sh"
 check_for_help_option ${WAHOO}/bin/.wahoo-path.sh
 
-
+now_testing "crlock.sh"
+NAME="No Tests Yet" && todo
 
 
 

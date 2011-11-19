@@ -4,6 +4,21 @@ Created                                                                Completed
 --------------------------------------------------------------------------------
 Most recent at the top.
 
+Nov. 19, 2011
+Changing a small thing in coding standard. When I have a variable which is "Y" or
+"N", I usually just leave the variable empty for "N" and set it to Y for "Y". 
+Then check for assignment [[ -n $VAR ] in order to see if it has been set to Y.
+This is just a preference and I like it because it makes the code a little easier
+to read in my opinion. However when debugging all you get is [[ -n "Y" ]] which 
+makes it hard to know what variable you are dealing with if you are not debugging
+in verbose (set -v) mode. My solution is to use something more meaningful instead
+of Y since I am only checking for size anyway...something like "REMOVE FILES".
+If you do this you get this when you are debugging [[ -n "REMOVE FILES ]] which
+is a lot easier to follow when looking at debug output.
+
+   * Screencast about this under "Code Style"
+   * Add this to TiddlyWiki.
+
 Nov. 17, 2011
 Need to add command line options to .wahoo-setup.sh so I can run automated tests
 without being prompted...do I really want to do this or is this a different test

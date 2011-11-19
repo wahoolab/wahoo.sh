@@ -12,6 +12,11 @@ usage: wahoo.sh [command] [options] [arguments]
 
 General command utility for Wahoo.
 
+   wahoo.sh log
+ 
+      # Log a message to application log file \${WAHOO}/log/wahoo.log
+      wahoo.sh log "Message"
+
    wahoo.sh setup
 
       Run Wahoo setup.
@@ -97,6 +102,12 @@ function set_wahoo_parm {
 }
 
 case ${1} in  
+   "log")
+      # We just re-use debug.sh for our purposes here.
+      WAHOO_DEBUG_LEVEL=1
+      WAHOO_DEBUG_LOG=${WAHOO}/log/wahoo.log
+      debug.sh "${2}"
+      ;;
    "config") 
       shift
       if [[ "${1}" == "--domain" ]]; then
@@ -124,3 +135,4 @@ case ${1} in
       ;;
 esac
 
+exit 0
