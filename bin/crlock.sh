@@ -32,7 +32,7 @@ Options:
       # of failures before triggering an error message to 
       standard error. This feature is disabled by default.
 
-   --max-processes
+   --max-processes [integer]
 
       Max # of simultaneous processes which are allowed to
       make attempts to aquire a lock before sending an
@@ -51,11 +51,8 @@ exit 0
 
 debug.sh "$0"
 
-# 36 hours, set to nothing or zero to disable. This needs to be a .wahoo parameter.
-MAX_LOCK_SECONDS=${MAX_LOCK_SECONDS:-129600}
-LOCK_DIR=${TMP}/locks/
-
 MAX_LOCK_SECONDS=${MAX_LOCK_SECONDS:-0}
+LOCK_DIR=${TMP}/locks/
 MAX_TRIES=1
 GRAB_LOCK=
 LOCK_KEY=
@@ -79,8 +76,6 @@ done
 LOCK_KEY="${1}"
 [[ -z ${LOCK_KEY} ]] && error.sh "$0 - LOCK_KEY is not defined." && exit 1
 
-trap 'rm ${LOCK_DIR}/${LOCK_KEY}/$$.trying' 0 1 15
-
 if (( ${MAX_LOCK_SECONDS} > 0 )); then
    ((EXPIRE_TIME=$(time.sh epoch)+MAX_LOCK_SECONDS))
 else
@@ -90,7 +85,7 @@ fi
 LOCK_DIR=${TMP}/locks/${LOCK_KEY}
 [[ ! -d ${LOCK_DIR} ]] && mkdir -p ${LOCK_DIR}
 cd ${LOCK_DIR}
-trap 'rm ${LOCK_DIR}/$$.trying' 0 1 15
+trap 'rm ${LOCK_DIR}/$$.trying 2> /dev/null' 0
 
 if [[ -n ${REMOVE_LOCK} ]]; then
    rm ${LOCK_DIR}/* 2> /dev/null 

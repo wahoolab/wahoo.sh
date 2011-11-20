@@ -168,6 +168,16 @@ DELETE_TMP_FILES_AFTER_N_DAYS=${DELETE_TMP_FILES_AFTER_N_DAYS}
 # Used for test purposes only.
 WAHOO_TEST=
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# crlock.sh
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Applies an expiration time to every lock if --expire option was not defined. When this parameter is set I am
+# preventing any lock from being held longer than the time defined. This is helpful when things go wrong and for 
+# whatever reason one or more locks are not released. This will help clear up problems automatically when your
+# doesn't handle it. Defaults to 129600 (36 hours). Set to 0 or empty to disable.
+# MAX_LOCK_SECONDS=129600
+MAX_LOCK_SECONDS=129600
+
 # You can configure settings for the entire domain in this file. These settings will over-ride the settings
 # in ~/.wahoo.
 . \${WAHOO}/domains/\${WAHOO_DOMAIN}/.wahoo

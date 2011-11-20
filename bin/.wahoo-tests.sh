@@ -249,7 +249,10 @@ now_testing ".wahoo-path.sh"
 check_for_help_option ${WAHOO}/bin/.wahoo-path.sh
 
 now_testing "crlock.sh"
-NAME="No Tests Yet" && todo
+NAME="No Tests Defined" && todo
+
+now_testing "rmlock.sh"
+NAME="No Tests Defined" && todo
 
 
 
