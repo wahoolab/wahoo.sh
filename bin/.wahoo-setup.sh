@@ -36,6 +36,20 @@ cd ..
 
 TMP=$(pwd)/tmp
 
+# Check if we have a copy of ksh 93. 
+if [[ ! -f ${TMP}/$(hostname)/ksh ]]; then
+   PATH_TO_KSH=$(which ksh)
+   printf "What is the full path ksh 93 binary [${PATH_TO_KSH}] > " && read ANSWER
+   PATH_TO_KSH=${ANSWER:-${PATH_TO_KSH}}
+   mkdir -p ${TMP}/$(hostname)
+   cp -p /tmp/wahoo ${TMP}/$(hostname)/ksh
+fi
+
+# Copy ksh 93 to /tmp/wahoo which gives us a known/universal location for the ksh binary (used in header of scripts).
+if [[ ! -f /tmp/wahoo ]]; then
+   cp -p ${TMP}/$(hostname)/ksh /tmp/wahoo
+fi
+
 # If this variable is not set then we have a new install and the ~/.wahoo file did not exist.
 if [[ -z ${WAHOO_HOME} || -z ${WAHOO} ]]; then
    # There are things we do for a new install only.
