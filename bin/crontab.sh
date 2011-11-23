@@ -3,9 +3,60 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-debug.sh "$0"
+function usage {
+cat <<EOF
+$LINE1
+usage: crontab.sh [options] 
 
-set -x
+Check if cron style options match current time. Exit 0 or 1.
+0 on match, 1 on no match.
+
+Options:
+
+   --minute [minute(s)]              
+
+      # Match if time is like 12:05, 01:05, 02:05...
+      crontab.sh --minute 5
+
+      # Match if minutes after hour between 15 and 30.
+      crontab.sh --minute 15-30
+
+      # Match if minutes after hour either 10, 20 or 30.
+      crontab.sh --minute 10,20,30
+
+   --hour [hour(s)]
+      
+      # Match if time is 6:00 AM.
+      crontab.sh --minute 0 --hour 6
+
+      # Match if time is 6:00 PM.
+      crontab.sh --minute 0 -hour 18
+
+      # Match every minute between 6:00 AM and 6:59 AM.
+      crontab.sh -hour 6
+
+   --day-of-month [day(s) of month]
+   
+      # Match if it is 3:15 PM on the 8'th day of the month.
+      crontab.sh --minute 15 -hour 15 -day-of-month 8
+
+   --month [month(s)]
+
+     # Match if it is Aug at 8:00 AM
+     crontab.sh --minute 0 -hour 8 -month 8
+
+   --day-of-week [day(s) of week]
+
+     # Match if it is 5:15 PM on Monday.
+     crontab.sh --minute 15 -hour 17 -day-of-week 1
+
+EOF
+exit 0
+}
+
+[[ "${1}" == "--help" ]] && usage
+
+debug.sh "$0"
 
 MINUTE="*"
 HOUR="*"
@@ -62,8 +113,6 @@ MATCH="MATCH"
 [[ ${MATCH} == "MATCH" && ${DAY_OF_MONTH} != "*" ]] && MATCH=$(check_for_match "${DAY_OF_MONTH}" $(date +"%d"))
 [[ ${MATCH} == "MATCH" && ${MONTH} != "*" ]] && MATCH=$(check_for_match "${MONTH}" $(date +"%m"))
 [[ ${MATCH} == "MATCH" && ${DAY_OF_WEEK} != "*" ]] && MATCH=$(check_for_match "${DAY_OF_WEEK}" $(date +"%w"))
-
-echo "match=${MATCH}"
 
 if [[ "${MATCH}" == "MATCH" ]]; then
    exit 0
