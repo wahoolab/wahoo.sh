@@ -1,4 +1,6 @@
 
+debug.sh -2 "$0"
+
 function usage {
 cat <<EOF
 $LINE1
@@ -20,8 +22,6 @@ exit 0
 }
 
 [[ "${1}" == "--help" ]] && usage
-
-debug.sh "$0"
 
 CACHE=${TMP}/cache
 [[ ! -d ${CACHE} ]] && mkdir ${CACHE}

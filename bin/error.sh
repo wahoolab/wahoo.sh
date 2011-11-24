@@ -21,15 +21,19 @@ exit 0
 [[ "${1}" == "--help" ]] && usage
 
 function WriteError {
-   echo "$(date) ERROR: ${1}" 3>&1 1>&2 2>&3
+   echo "${1}" 3>&1 1>&2 2>&3
 }
 
 if [[ -n "${1}" ]]; then
    WriteError "${1}"
 else
+   # Not liking this for now.
+   # WriteError "$(date) WRITING INPUT FROM STANDARD IN"
    while read INPUT; do
       WriteError "${INPUT}"
    done
+   # WriteError "$(date) DONE"
 fi
 
-debug.sh -1 "ERROR: ${1}"
+# This does not work with std in so removing for now.
+# debug.sh -1 "ERROR: ${1}"

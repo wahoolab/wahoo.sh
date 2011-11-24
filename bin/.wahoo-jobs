@@ -1,0 +1,23 @@
+# Every minute.
+@ * * * * * 
++ lab-vm1
+sleep 10; echo "$(date) Every Minute"
+sleep 20; ls /foo
+echo "$(date) This should also run every minute."
++ not_lab
+echo "$(date) You should not see this!"
+# Every 5 minutes.
+@ 0,5,10,15,20,25,30,35,40,45,50,55 * * * *
+echo "This should run every 5 minutes."
+find /home/lab/Dropbox/wahoo/tmp -type f -exec ls -alrt {} \;
+# Every 10 minutes.
+@ 0,10,20,30,40,50 * * * * 
+echo "Every 10 minutes"
+# Every 20 minutes.
+@ 0,20,40 * * * * 
+echo "Every 20 minutes"
+# Every hour.
+@ 0 * * * * 
+echo "Every hour"
+# Working Hours
+# @ * 

@@ -3,6 +3,8 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
+debug.sh -2 "$0"
+
 function usage {
 cat <<EOF
 $LINE1
@@ -56,8 +58,6 @@ exit 0
 
 [[ "${1}" == "--help" ]] && usage
 
-debug.sh "$0"
-
 MINUTE="*"
 HOUR="*"
 DAY_OF_WEEK="*"
@@ -71,6 +71,10 @@ while (( $# > 0)); do
       --day-of-week) shift; DAY_OF_WEEK="${1}" ;;
       --month) shift; MONTH="${1}" ;;
       --day-of-month) shift; DAY_OF_MONTH="${1}" ;;
+      --schedule) 
+         shift
+         echo "${1}" | sed 's/\*/\\\*/g' | read MINUTE HOUR DAY_OF_WEEK MONTH DAY_OF_MONETH
+         ;;
       *) break ;;
    esac
    shift

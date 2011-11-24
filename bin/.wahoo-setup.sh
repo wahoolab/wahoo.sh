@@ -67,6 +67,8 @@ else
    # Backup the current config file and keep a reference to the file name for use later.
    BACKUP_CONFIG_FILE=${TMP}/.wahoo.$(date +"%Y%m%d_%H%M%S")
    [[ -f ~/.wahoo ]] && cp -p ~/.wahoo ${BACKUP_CONFIG_FILE}
+   # Go ahead and remove any backups of this file older than 30 days.
+   find ${TMP} -name ".wahoo.*" -mtime +30 -exec rm {} \;
 fi
 
 WAHOO_HOME=$(pwd)

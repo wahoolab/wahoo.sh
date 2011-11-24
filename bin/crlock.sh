@@ -4,6 +4,8 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
+debug.sh -2 "$0"
+
 function usage {
 cat <<EOF
 $LINE1
@@ -48,8 +50,6 @@ exit 0
 }
 
 [[ "${1}" == "--help" ]] && usage
-
-debug.sh "$0"
 
 MAX_LOCK_SECONDS=${MAX_LOCK_SECONDS:-0}
 LOCK_DIR=${TMP}/locks/

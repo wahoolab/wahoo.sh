@@ -30,6 +30,10 @@ function split_string {
    echo "${1}" | tr "${SPLITTER}" "\n"
 }
 
+function nospace {
+   echo "${1}" | sed 's/ //g'
+}
+
 CONVERSION_FUNCTION=
 case "${1}" in
    "upper"|"ucase") 
@@ -43,6 +47,9 @@ case "${1}" in
    "split")
       SPLITTER=${2:-":"}
       CONVERSION_FUNCTION="split_string"
+      ;;
+   "nospace")
+      CONVERSION_FUNCTION="nospace"
       ;;
 esac
 
