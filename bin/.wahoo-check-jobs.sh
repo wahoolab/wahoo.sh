@@ -3,7 +3,7 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-debug.sh -1 "$0"
+debug.sh -2 "$0"
 
 if ! $(crlock.sh --try 60 --expire 3600 --fail 5 --max-processes 5 wahoo-check-jobs); then
    exit 1

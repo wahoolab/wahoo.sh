@@ -103,6 +103,9 @@ cat <<EOF
 # This prevents the file from being loaded more than once.
 [[ -n \${WAHOO} ]] && return
 
+# Always automatically replace /tmp/wahoo if it has been removed for some reason.
+$(echo "[[ ! -f /tmp/wahoo ]] && cp ${TMP}/$(hostname)/ksh /tmp/wahoo && chmod 700 /tmp/wahoo")
+
 # -----------------------------------------------------------------------------
 # REQUIRED
 # -----------------------------------------------------------------------------
@@ -217,3 +220,26 @@ fi
 grep "^[A-Z].*=" ~/.wahoo | while read LINE; do
    setuplog "${LINE}"
 done
+
+(
+cat <<EOF
+# Always automatically replace /tmp/wahoo if it has been removed for some reason.
+if [ ! -f /tmp/wahoo ]; then 
+   cp ${WAHOO_HOME}/tmp/$(hostname)/ksh /tmp/wahoo 
+   chmod 700 /tmp/wahoo
+fi
+
+# Attempt to load ~/.wahoo configuration file.
+[ -f .wahoo ] && $(. .wahoo 2> /dev/null)
+[ -f ~/.wahoo ] && . ~/.wahoo
+
+${WAHOO}/bin/.wahoo-check-jobs.sh 1>> ${WAHOO}/log/stdout 2>> ${WAHOO}/log/stderr
+EOF
+) > ${WAHOO_HOME}/run.sh
+chmod 700 ${WAHOO_HOME}/run.sh
+
+cat <<EOF
+# Cron job for wahoo
+* * * * * ${WAHOO_HOME}/run.sh
+EOF
+
