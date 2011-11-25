@@ -3,7 +3,7 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-debug.sh -2 "$0"
+debug.sh -2 "$(basename $0)"
 
 if ! $(crlock.sh --try 60 --expire 3600 --fail 5 --max-processes 5 wahoo-check-jobs); then
    exit 1
@@ -32,6 +32,8 @@ function test_regex {
 }
 
 function get_schedule {
+   # debug.sh -3 "get_schedule \${1}=${1}"
+   # debug.sh -3 "get_schedule $(echo "${1}" | sed 's/^@//')"
    echo "${1}" | sed 's/^@//'
 }
 
@@ -55,7 +57,10 @@ function check_host {
 MATCH=
 SCHEDULE=
 EVENT=
-grep -v "^#" ${JOB_FILE} | while read -r l; do
+
+# -r option on read prevents the "\" from being removed from lines in the file.
+cat ${JOB_FILE} | str.sh noblank nocomment left | while read -r l; do
+   # echo "l=${l}"
    # Lines that match ^@ are a new schedule.
    if (( $(test_regex "^@")  )); then
       # Need to initialize HOST_MATCH here everytime we hit a new schedule. Assume a match at this point.
@@ -91,7 +96,7 @@ grep -v "^#" ${JOB_FILE} | while read -r l; do
             echo "${l}" > ${TMPFILE}${TMPID}
             chmod 700 ${TMPFILE}${TMPID}
             # Run in backgroud and keep rolling. 
-            debug.sh -1 "$0 - ${l}"
+            debug.sh -1 "$(basename $0) - ${l}"
             runscript.sh ${TMPFILE}${TMPID} &
          fi
       fi

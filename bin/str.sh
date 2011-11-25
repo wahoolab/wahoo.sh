@@ -16,43 +16,98 @@ Options:
 
    "lcase" or "lower"
 
+   "split"
+
+   "nospace"
+
+   "noblank"
+
+   "nocomment"
+  
+   "left"
+
 EOF
 exit 0
 }
 
 [[ "${1}" == "--help" ]] && usage
 
+TMPFILE=${TMP}/$$.tmp
+trap 'rm ${TMPFILE}* 2> /dev/null' 0
+
+OIFS="${IFS}"; IFS=
+while read -r INPUT; do
+   echo "${INPUT}" >> ${TMPFILE}
+done
+IFS=${OIFS}
+
 function convert_case {
-   echo "${1}"
+   (
+   while read -r INPUT; do
+      echo "${INPUT}"
+   done
+   ) < ${TMPFILE} > ${TMPFILE}.2 
+   mv ${TMPFILE}.2 ${TMPFILE}
 }
 
 function split_string {
-   echo "${1}" | tr "${SPLITTER}" "\n"
+   cat ${TMPFILE} | tr "${SPLITTER}" "\n" > ${TMPFILE}.2
+   mv ${TMPFILE}.2 ${TMPFILE}
 }
 
 function nospace {
-   echo "${1}" | sed 's/ //g'
+   sed 's/ //g' ${TMPFILE} > ${TMPFILE}.2
+   mv ${TMPFILE}.2 ${TMPFILE}
 }
 
-CONVERSION_FUNCTION=
-case "${1}" in
-   "upper"|"ucase") 
-      typeset -u INPUT
-      CONVERSION_FUNCTION="convert_case"
-      ;;
-   "lower"|"lcase")
-      typeset -l INPUT
-      CONVERSION_FUNCTION="convert_case"
-      ;;
-   "split")
-      SPLITTER=${2:-":"}
-      CONVERSION_FUNCTION="split_string"
-      ;;
-   "nospace")
-      CONVERSION_FUNCTION="nospace"
-      ;;
-esac
+function noblank {
+   egrep -v "^ *$|^$" ${TMPFILE} > ${TMPFILE}.2
+   mv ${TMPFILE}.2 ${TMPFILE}
+}
 
-while read INPUT; do
-   ${CONVERSION_FUNCTION} "${INPUT}"
+function nocomment {
+   egrep -v "^ *#" ${TMPFILE} > ${TMPFILE}.2
+   mv ${TMPFILE}.2 ${TMPFILE}
+}
+
+function left {
+   typeset -l INPUT
+   (
+   while read -r INPUT; do
+      echo "${INPUT}"
+   done
+   ) < ${TMPFILE} > ${TMPFILE}.2
+   mv ${TMPFILE}.2 ${TMPFILE}
+}
+
+while (( $# > 0 )); do
+   case "${1}" in
+      "upper"|"ucase") 
+         typeset -u INPUT
+         convert_case
+         ;;
+      "lower"|"lcase")
+         typeset -l INPUT
+         convert_case
+         ;;
+      "split")
+         SPLITTER=${2:-":"}
+         split_string
+         ;;
+      "nospace")
+         nospace
+         ;;
+      "noblank")
+         noblank     
+         ;;
+      "nocomment")
+         nocomment
+         ;;
+      "left")
+         left
+         ;;
+   esac
+   shift
 done
+
+cat ${TMPFILE}

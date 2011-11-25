@@ -3,7 +3,8 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-debug.sh -2 "$0"
+# WAHOO_DEBUG_LEVEL=2
+debug.sh -2 "$0 $*"
 
 function usage {
 cat <<EOF

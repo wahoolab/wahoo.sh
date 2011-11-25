@@ -1,31 +1,40 @@
 # Every minute.
 @ * * * * * 
-+ lab-vm1
-sleep 10; echo "$(date) Every Minute"
-# sleep 20; ls /foo
-echo "$(date) This should also run every minute."
-+ not_lab
-echo "$(date) You should not see this!"
+  echo "$(date) This should also run every minute on all hosts."
+  # This line will throw an error.
+  # sleep 20; ls /foo
+  + lab-vm1
+    sleep 10; echo "$(date) Every minute, only runs on lab-vm1"
+  + not_lab
+    echo "$(date) You should not see this!"
+
 # Every 5 minutes.
 @ 0,5,10,15,20,25,30,35,40,45,50,55 * * * *
-echo "This should run every 5 minutes."
-find /home/lab/Dropbox/wahoo/tmp -type f -exec ls -alrt {} \;
+  echo "This should run every 5 minutes."
+  # Testing use of backslash here.
+  find /home/lab/Dropbox/wahoo/tmp -type f -exec ls -alrt {} \;
+
 # Every 10 minutes.
 @ 0,10,20,30,40,50 * * * * 
-echo "Every 10 minutes"
+  echo "Every 10 minutes"
+
 # Every 20 minutes.
 @ 0,20,40 * * * * 
-echo "Every 20 minutes"
+  echo "Every 20 minutes"
+
 # Every hour.
 @ 0 * * * * 
-echo "Every hour"
-# Working Hours
-# @ * 
+  echo "Every hour"
+
+# When server reboots.
 ! reboot
-echo "Runs when a reboot is detected."
+  echo "Runs when a reboot is detected."
+
+
+# When server signals high cpu.
 ! high_cpu
-echo "Runs when high cpu."
-+ not_lab
-echo "Should not see this"
-+ lab-vm1
-echo "High cpu on lab-vm1 only."
+  echo "Runs when high cpu on all hosts."
+    + not_lab
+      echo "High CPU - Should not see this on the lab-vm1 host."
+    + lab-vm1
+      echo "High CPU - Runs on lab-vm1 only."
