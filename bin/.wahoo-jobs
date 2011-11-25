@@ -2,7 +2,7 @@
 @ * * * * * 
 + lab-vm1
 sleep 10; echo "$(date) Every Minute"
-sleep 20; ls /foo
+# sleep 20; ls /foo
 echo "$(date) This should also run every minute."
 + not_lab
 echo "$(date) You should not see this!"
@@ -21,3 +21,11 @@ echo "Every 20 minutes"
 echo "Every hour"
 # Working Hours
 # @ * 
+! reboot
+echo "Runs when a reboot is detected."
+! high_cpu
+echo "Runs when high cpu."
++ not_lab
+echo "Should not see this"
++ lab-vm1
+echo "High cpu on lab-vm1 only."

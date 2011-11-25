@@ -23,10 +23,8 @@ File Contents
 ${LINE1}
 $(cat ${SCRIPT})
 EOF
-) | error.sh
-
+) >> ${WAHOO}/log/stderr
 wahoo.sh log "An error occurred while running ${SCRIPT} from runscript.sh."
-
 fi
 
 if [[ -s ${TMPFILE}.stdout ]]; then
