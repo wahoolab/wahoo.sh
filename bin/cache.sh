@@ -3,7 +3,6 @@ debug.sh -2 "$0"
 
 function usage {
 cat <<EOF
-$LINE1
 usage: cache.sh [options] 
 
 Simple file system based key value store.

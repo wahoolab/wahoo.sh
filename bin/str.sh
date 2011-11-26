@@ -1,7 +1,6 @@
 
 function usage {
 cat <<EOF
-$LINE1
 usage: str.sh [option] 
 
 Perform string related actions to standard input.
@@ -16,15 +15,28 @@ Options:
 
    "lcase" or "lower"
 
-   "split"
+      Convert input to lower case.
+
+   "split" [delim]
+
+      Split list of items using [delim]. Default [delim]
+      is a colon ":".
 
    "nospace"
 
+      Remove spaces.
+
    "noblank"
+
+      Remove blank lines.
 
    "nocomment"
   
+      Remove Unix syle comments.
+
    "left"
+
+      Left justify.
 
 EOF
 exit 0
@@ -71,7 +83,7 @@ function nocomment {
 }
 
 function left {
-   typeset -l INPUT
+   # typeset -L INPUT
    (
    while read -r INPUT; do
       echo "${INPUT}"

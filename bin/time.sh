@@ -1,7 +1,6 @@
 
 function usage {
 cat <<EOF
-$LINE1
 usage: time.sh [options] 
 
 Misc. time functions.

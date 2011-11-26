@@ -13,10 +13,18 @@ trap 'rmlock.sh wahoo-check-jobs' 0
 
 JOB_FILE=${WAHOO}/bin/.wahoo-jobs
 TMPID=${RANDOM}
-EVENT_NAME=${1}
+EVENT_NAME=
 TMPFILE=${TMP}/$$.tmp
 
-[[ -n "${1}" ]] && EVENT_NAME="${1}"
+while (( $# > 0)); do
+   case $1 in
+      --file) shift; JOB_FILE="${1}" ;;
+      --event) shift; EVENT_NAME="${1}" ;;
+      *) break ;;
+   esac
+   shift
+done
+(( $(has.sh option) )) && error.sh "$0 - $* contains an unrecognized option." && exit 1
 
 # Typically we would clean up after ourselves, but not 
 # in this case, we will let runscript.sh take care of it.

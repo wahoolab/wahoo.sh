@@ -1,7 +1,6 @@
 
 function usage {
 cat <<EOF
-$LINE1
 usage: has.sh [option] "[string]"
 
 Misc. "has" functions.

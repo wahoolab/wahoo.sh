@@ -8,7 +8,6 @@ debug.sh -2 "$0 $*"
 
 function usage {
 cat <<EOF
-$LINE1
 usage: crontab.sh [options] 
 
 Check if cron style options match current time. Exit 0 or 1.

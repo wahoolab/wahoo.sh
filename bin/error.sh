@@ -2,7 +2,6 @@
 
 function usage {
 cat <<EOF
-$LINE1
 usage: error.sh "[string]"
 
 Takes input and directs it back out to standard error. If "[string]" is not 

@@ -1,7 +1,6 @@
 
 function usage {
 cat <<EOF
-$LINE1
 usage: debug.sh [options] "[string]"
 
 Log a debug message.

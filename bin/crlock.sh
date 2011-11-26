@@ -8,7 +8,6 @@ debug.sh -2 "$0"
 
 function usage {
 cat <<EOF
-$LINE1
 usage: crlock.sh [options] [lock_key]
 
 Locking script.

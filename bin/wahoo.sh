@@ -7,7 +7,6 @@ WAHOO_VERSION=1
 
 function usage {
 cat <<EOF
-$LINE1
 usage: wahoo.sh [command] [options] [arguments] 
 
 General command utility for Wahoo.

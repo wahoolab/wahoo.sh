@@ -254,5 +254,48 @@ NAME="No Tests Defined" && todo
 now_testing "rmlock.sh"
 NAME="No Tests Defined" && todo
 
+now_testing ".wahoo-check-jobs.sh"
+# Prep
+(
+rm ${TMP}/test 
+rm ${WAHOO}/log/stderr ${WAHOO}/log/stdout 
+rm ${TMP}/test-convert.tmp 
+) 2> /dev/null
+check_for_help_option ${WAHOO}/bin/.wahoo-check-jobs.sh
+NAME="Touch file every minute."
+rm ${TMP}/test 2> /dev/null
+.wahoo-check-jobs.sh --file ${WAHOO}/bin/.wahoo-jobs-test
+sleep 10
+if [[ -f ${TMP}/test ]]; then
+   success
+else
+   failure
+fi
+rm ${TMP}/test 2> /dev/null
+
+NAME="Writing to standard error."
+if $(grep "cannot access \/file_does_not_exist" ${WAHOO}/log/stderr > /dev/null 2>&1); then
+   success
+else
+   failure
+fi
+
+NAME="Running .sh script from \${WAHOO}/bin"
+if $( grep "convert this string" ${TMP}/test-convert.tmp > /dev/null 2>&1); then
+   success
+else
+   failure   
+fi
+
+NAME="Testing ExampleEvent"
+rm ${TMP}/test 2> /dev/null
+.wahoo-check-jobs.sh --event ExampleEvent --file ${WAHOO}/bin/.wahoo-jobs-test
+sleep 10
+if [[ -f ${TMP}/test ]]; then
+   success
+else
+   failure
+fi
+rm ${TMP}/test 2> /dev/null
 
 
