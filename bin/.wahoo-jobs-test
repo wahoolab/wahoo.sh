@@ -1,9 +1,0 @@
-# Every minute.
-@ * * * * * 
-  touch "${TMP}/test"
-  ls /file_does_not_exist
-  echo "CONVERT THIS STRING" | str.sh lcase > ${TMP}/test-convert.tmp
-
-! ExampleEvent
-  touch "${TMP}/test"
-

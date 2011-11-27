@@ -20,6 +20,10 @@ General command utility for Wahoo.
 
       Run Wahoo setup.
 
+   wahoo.sh test
+
+      Run the test suite.
+
    wahoo.sh version
 
       Return Wahoo version number.
@@ -126,6 +130,9 @@ case ${1} in
       else
          ./.wahoo-setup.sh
       fi
+      ;;
+   "test")
+      ${WAHOO}/tests/run-all.sh
       ;;
    "version")
       echo ${WAHOO_VERSION} 

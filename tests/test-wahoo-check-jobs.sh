@@ -1,3 +1,6 @@
+
+. ${WAHOO}/tests/functions.sh
+
 now_testing ".wahoo-check-jobs.sh"
 # Prep
 (
@@ -128,7 +131,5 @@ cat <<EOF
 EOF
 ) > ${TMP}/.wahoo-jobs
 .wahoo-check-jobs.sh --event Foo --file ${TMP}/.wahoo-jobs
-
-
 
 
