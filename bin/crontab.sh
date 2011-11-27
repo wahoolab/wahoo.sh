@@ -73,13 +73,17 @@ while (( $# > 0)); do
       --day-of-month) shift; DAY_OF_MONTH="${1}" ;;
       --schedule) 
          shift
-         echo "${1}" | sed 's/\*/\\\*/g' | read MINUTE HOUR DAY_OF_WEEK MONTH DAY_OF_MONETH
+         echo "${1}" | sed 's/\*/\\\*/g' | read MINUTE HOUR DAY_OF_WEEK MONTH DAY_OF_MONTH
          ;;
       *) break ;;
    esac
    shift
 done
 (( $(has.sh option) )) && error.sh "$0 - $* contains an unrecognized option." && exit 1
+
+for o in "${MINUTE}" "${HOUR}" "${DAY_OF_WEEK}" "${MONTH}" "${DAY_OF_MONTH}"; do
+   [[ -z ${o} ]] && error.sh "$0 - Schedule has an error. MINUTE=${MINUTE},HOUR=${HOUR},DAY_OF_WEEK=${DAY_OF_WEEK},MONTH=${MONTH},DAY_OF_MONTH=${DAY_OF_MONTH}" && exit 1
+done
 
 function exact_match {
    (( $1 == $2 )) && echo "${MATCH}"

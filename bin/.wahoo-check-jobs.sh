@@ -50,7 +50,7 @@ function get_event {
 }
 
 function get_hosts {
-   echo "${1}" | sed 's/^\+//'
+   echo "${1}" | sed 's/^\+//' | str.sh split ","
 }
 
 function check_host {
