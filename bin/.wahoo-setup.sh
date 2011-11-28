@@ -239,7 +239,12 @@ EOF
 chmod 700 ${WAHOO_HOME}/run.sh
 
 cat <<EOF
-# Cron job for wahoo
+$LINE1
+In order to enable automated schedules and provide event responses you will 
+need to add the following to your crontab file. We suggest you run this 
+manually first and ensure there are no issues.
+
 * * * * * ${WAHOO_HOME}/run.sh
+
 EOF
 
