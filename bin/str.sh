@@ -44,6 +44,8 @@ exit 0
 
 [[ "${1}" == "--help" ]] && usage
 
+# During initial setup TMP will not be defined yet, so we might need to define it.
+TMP=${TMP:-/tmp}
 TMPFILE=${TMP}/$$.tmp
 trap 'rm ${TMPFILE}* 2> /dev/null' 0
 

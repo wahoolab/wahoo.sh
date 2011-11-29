@@ -42,7 +42,7 @@ if [[ ! -f ${TMP}/$(hostname)/ksh ]]; then
    printf "What is the full path ksh 93 binary [${PATH_TO_KSH}] > " && read ANSWER
    PATH_TO_KSH=${ANSWER:-${PATH_TO_KSH}}
    mkdir -p ${TMP}/$(hostname)
-   cp -p /tmp/wahoo ${TMP}/$(hostname)/ksh
+   cp -p ${PATH_TO_KSH} ${TMP}/$(hostname)/ksh
 fi
 
 # Copy ksh 93 to /tmp/wahoo which gives us a known/universal location for the ksh binary (used in header of scripts).
@@ -56,7 +56,7 @@ if [[ -z ${WAHOO_HOME} || -z ${WAHOO} ]]; then
    printf "Define the WAHOO_DOMAIN  > " && read WAHOO_DOMAIN
    [[ -z ${WAHOO_DOMAIN} ]] && exit 1
    typeset -u WAHOO_PROD
-   printf "If this is a production host, enter Y > " && read WAHOO_PROD
+   printf "Is this a production host (Y or N) [Y] > " && read WAHOO_PROD
    printf "Define the SIMPLE_HOSTNAME > " && read SIMPLE_HOSTNAME
    [[ -z ${SIMPLE_HOSTNAME} ]] && SIMPLE_HOSTNAME=$(hostname)
    # We will only set this for a new install, after this it could be that the user really wants it to be null.
