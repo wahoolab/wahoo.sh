@@ -61,7 +61,7 @@ if [[ -z ${WAHOO_HOME} || -z ${WAHOO} ]]; then
    [[ -z ${SIMPLE_HOSTNAME} ]] && SIMPLE_HOSTNAME=$(hostname)
    # We will only set this for a new install, after this it could be that the user really wants it to be null.
    [[ -z ${MESSAGE_SUBJECT_PREFIX} ]] && MESSAGE_SUBJECT_PREFIX="[${WAHOO_DOMAIN}]"
-   [[ -z ${MAIL_PROGRAM} ]] && MAIL_PROGRAM=$(first_file_found "/bin /usr /" "mailx mail")
+   [[ -z ${WAHOO_MAIL_PROGRAM} ]] && MAIL_PROGRAM=$(first_file_found "/bin /usr /" "mailx mail")
    [[ ! -d tmp ]] && mkdir tmp
 else
    # Backup the current config file and keep a reference to the file name for use later.
@@ -168,7 +168,7 @@ WAHOO_PROD=${WAHOO_PROD}
 SIMPLE_HOSTNAME="${SIMPLE_HOSTNAME}"
 
 # Name of program to send email with, almost always mail or mailx.
-MAIL_PROGRAM=${MAIL_PROGRAM}
+WAHOO_MAIL_PROGRAM=${WAHOO_MAIL_PROGRAM}
 
 # Default list of email addresses to be used when emails are sent.
 # WAHOO_EMAILS="admin@wahoolab.com,appgroup@acmeco.com"
@@ -230,7 +230,7 @@ if [ ! -f /tmp/wahoo ]; then
 fi
 
 # Attempt to load ~/.wahoo configuration file.
-[ -f .wahoo ] && $(. .wahoo 2> /dev/null)
+[ -f .wahoo ] && \$(. .wahoo 2> /dev/null)
 [ -f ~/.wahoo ] && . ~/.wahoo
 
 ${WAHOO}/bin/.wahoo-check-jobs.sh 1>> ${WAHOO}/log/stdout 2>> ${WAHOO}/log/stderr
