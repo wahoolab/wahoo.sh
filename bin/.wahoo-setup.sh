@@ -150,6 +150,12 @@ WAHOO_DEBUG_LEVEL=1
 # Name of debug file. 
 WAHOO_DEBUG_LOG=${WAHOO}/log/debug.log
 
+# Name of default audit log file (used when messages are tagged with the KEYWORD "AUDIT".
+WAHOO_AUDIT_LOG=${WAHOO}/log/audit.log
+
+# Name of file messages are log to when messages are routed using the LOG keyword.
+WAHOO_MESSAGE_LOG=${WAHOO}/log/messages.log
+
 # 80 single dashes. Used in scripts.
 LINE1=$(printf %80s|tr ' ' "-")
 
@@ -180,6 +186,9 @@ WAHOO_PAGERS="${WAHOO_PAGERS}"
 
 # This is the string which will begin the subject line of all emails.
 MESSAGE_SUBJECT_PREFIX="${MESSAGE_SUBJECT_PREFIX}"
+
+# KEYWORD_OVERRIDES="CRITICAL=WARNING,LOG=TRASH"
+KEYWORD_OVERRIDES=
 
 # If you forget to clean up your .tmp files in ${TMP} the task can be automated here.
 DELETE_TMP_FILES_AFTER_N_DAYS=${DELETE_TMP_FILES_AFTER_N_DAYS}

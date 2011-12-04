@@ -20,4 +20,6 @@ test-wahoo-path.sh
 test-crlock.sh
 test-rmlock.sh
 test-wahoo-check-jobs.sh
-
+test-mail.sh
+test-fire-event.sh
+test-route-message.sh

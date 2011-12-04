@@ -18,6 +18,10 @@ Options:
       # Return hours (not rounded) since epoch.
       time.sh epoch --hours 
       
+   "y-m-d"
+
+     Return date in format YYYY-MM-DD.
+
 EOF
 exit 0
 }
@@ -33,5 +37,8 @@ case "${1}" in
          *          ) printf "${EPOCH}"                                                 ;;
        esac
        ;;
+   "y-m-d")
+      date +"%Y-%m-%d"
+      ;;
 esac
 
