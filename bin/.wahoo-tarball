@@ -1,0 +1,20 @@
+
+
+
+[[ ! -d ${WAHOO} ]] && exit 1
+
+YMD=$(time.sh y-m-d)
+cd ${WAHOO}/..
+rm -rf ${WAHOO}${YMD}.tar.gz
+rm -rf ${WAHOO}${YMD} 2> /dev/null
+cp -rp ${WAHOO} ${WAHOO}${YMD}
+cd ${WAHOO}${YMD}
+rm run.sh 2> /dev/null
+rm -rf domains tmp log 2> /dev/null
+cd ${WAHOO}/.. 
+tar -cf ${WAHOO}${YMD}.tar wahoo${YMD}
+gzip ${WAHOO}${YMD}.tar
+rm -rf ${WAHOO}${YMD}
+
+ls ${WAHOO}${YMD}.tar.gz
+

@@ -70,7 +70,7 @@ while (( $# > 0)); do
    esac
    shift
 done
-(( $(has.sh option) )) && error.sh "$0 - $* contains an unrecognized option." && exit 1
+(( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
 
 LOCK_KEY="${1}"
 [[ -z ${LOCK_KEY} ]] && error.sh "$0 - LOCK_KEY is not defined." && exit 1
@@ -97,7 +97,7 @@ AQUISITION="FAILED"
 p=0
 if (( ${MAX_PROCESSES:-0} > 0 )); then
    cat *.trying 2> /dev/null | while read t; do
-      echo t=${t}
+      # We are only interested in counting active processes.
       (( ${t} > (($(time.sh epoch)-60)) )) && ((p=p+1))
    done
    if (( ${p} >= ${MAX_PROCESSES} )); then

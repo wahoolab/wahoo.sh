@@ -1,7 +1,7 @@
 
 . ${WAHOO}/tests/functions.sh
 
-now_testing ".wahoo-check-jobs.sh"
+nowTesting ".wahoo-check-jobs.sh"
 # Prep
 (
 rm ${TMP}/test 

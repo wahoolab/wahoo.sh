@@ -79,7 +79,7 @@ while (( $# > 0)); do
    esac
    shift
 done
-(( $(has.sh option) )) && error.sh "$0 - $* contains an unrecognized option." && exit 1
+(( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
 
 for o in "${MINUTE}" "${HOUR}" "${DAY_OF_WEEK}" "${MONTH}" "${DAY_OF_MONTH}"; do
    [[ -z ${o} ]] && error.sh "$0 - Schedule has an error. MINUTE=${MINUTE},HOUR=${HOUR},DAY_OF_WEEK=${DAY_OF_WEEK},MONTH=${MONTH},DAY_OF_MONTH=${DAY_OF_MONTH}" && exit 1

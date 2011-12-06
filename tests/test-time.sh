@@ -2,7 +2,7 @@
 
 . ${WAHOO}/tests/functions.sh
 
-now_testing "time.sh"
+nowTesting "time.sh"
 
 check_for_help_option ${WAHOO}/bin/time.sh
 NAME="time.sh epoch"

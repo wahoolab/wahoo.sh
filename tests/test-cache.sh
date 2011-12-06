@@ -1,10 +1,16 @@
 
 . ${WAHOO}/tests/functions.sh
 
-now_testing "cache.sh"
-check_for_help_option ${WAHOO}/bin/cache.sh
-NAME="cache.sh set foo bar" && todo
-NAME="cache.sh get foo" && todo
-NAME="cat foo.txt | cache.sh set foo" && todo
-NAME="cache.sh get foo" && todo
+nowTesting "cache.sh"
+
+beginTest "--help Option"
+assertTrue $(grep "\-\-help" ${WAHOO}/bin/route-message.sh | wc -l)
+endTest
+
+exit
+
+NAME="cache.sh set foo bar" 
+NAME="cache.sh get foo"
+NAME="cat foo.txt | cache.sh set foo" 
+NAME="cache.sh get foo" 
 

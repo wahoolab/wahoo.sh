@@ -1,7 +1,7 @@
 
 . ${WAHOO}/tests/functions.sh
 
-now_testing "wahoo.sh"
+nowTesting "wahoo.sh"
 check_for_help_option ${WAHOO}/bin/wahoo.sh
 
 NAME="log to wahoo.log" && todo

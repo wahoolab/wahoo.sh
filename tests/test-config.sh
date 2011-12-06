@@ -1,7 +1,7 @@
 
 . ${WAHOO}/tests/functions.sh
 
-now_testing "Wahoo Installation"
+nowTesting "Wahoo Installation"
 
 # Verify variable have values when required.
 (
@@ -19,7 +19,7 @@ TMP
 SIMPLE_HOSTNAME
 EOF
 ) | while read p; do
-   NAME="Variable ${p} is defined."
+   beginTest "Variable ${p} is defined."
    if [[ -n $(echo $(eval "echo \${${p}}")) ]]; then
       success
    else
@@ -27,77 +27,43 @@ EOF
    fi
 done
 
-NAME="\${TMP} directory exists."
-if [[ -d ${TMP} ]]; then
-   success
-else
-   failure
-fi
+beginTest "\${TMP} directory exists."
+assertTrue $([[ -d ${TMP} ]] && echo 1 )
+endTest
 
-NAME="\${LOCAL_CONFIG_FILE} exists."
-if [[ -f ${LOCAL_CONFIG_FILE} ]]; then
-   success
-else
-   failure
-fi
+beginTest "\${LOCAL_CONFIG_FILE} exists."
+assertTrue $([[ -f ${LOCAL_CONFIG_FILE} ]] && echo 1 )
+endTest
 
-NAME="\${DOMAIN_CONFIG_FILE} exists."
-if [[ -f ${DOMAIN_CONFIG_FILE} ]]; then
-   success
-else
-   failure
-fi
+beginTest "\${DOMAIN_CONFIG_FILE} exists."
+assertTrue $([[ -f ${DOMAIN_CONFIG_FILE} ]] && echo 1 )
+endTest
 
-NAME="\${WAHOO}/domains/\${WAHOO_DOMAIN}/bin exists."
-if [[ -d ${WAHOO}/domains/${WAHOO_DOMAIN}/bin ]]; then
-   success
-else
-   failure
-fi
+beginTest "\${WAHOO}/domains/\${WAHOO_DOMAIN}/bin exists."
+assertTrue $([[ -d ${WAHOO}/domains/${WAHOO_DOMAIN}/bin ]] && echo 1 )
+endTest
 
-NAME="PATH includes \${WAHOO}/bin."
-if (( $(echo ${PATH} | egrep "${WAHOO}/bin" | wc -l) )); then
-   success
-else
-   failure
-fi
+beginTest "PATH includes \${WAHOO}/bin."
+assertTrue $(echo ${PATH} | egrep "${WAHOO}/bin" | wc -l)
+endTest
 
-NAME="PATH includes \${WAHOO}/domains/\${WAHOO_DOMAIN}/bin"
-if (( $(echo ${PATH} | egrep "${WAHOO}/domains/${WAHOO_DOMAIN}/bin" | wc -l) )); then
-   success
-else
-   failure
-fi
+beginTest "PATH includes \${WAHOO}/domains/\${WAHOO_DOMAIN}/bin"
+assertTrue $(echo ${PATH} | egrep "${WAHOO}/domains/${WAHOO_DOMAIN}/bin" | wc -l) 
+endTest
 
-NAME="Local copy of Korn Shell 93 is available."
-if [[ -f ${TMP}/$(hostname)/ksh ]]; then
-   success
-else
-   failure
-fi
+beginTest "Local copy of Korn Shell 93 is available."
+assertTrue $([[ -f ${TMP}/$(hostname)/ksh ]] && echo 1)
+endTest
 
-NAME="/tmp/wahoo exists"
-if [[ -f /tmp/wahoo ]]; then
-   success
-else
-   failure
-fi
+beginTest "/tmp/wahoo exists"
+assertTrue $([[ -f /tmp/wahoo ]] && echo 1)
+endTest
 
-NAME="Current shell is Korn Shell 93."
-if [[ -f /tmp/wahoo ]]; then
-   if (( $(set | grep "SECONDS" | str.sh split "." | wc -l) > 1 )); then
-      success
-   else
-      failure
-   fi
-   exit 0
-else
-   failure
-fi
+beginTest "Current shell is Korn Shell 93."
+assertTrue $([[ -f /tmp/wahoo ]] && echo 1 )
+assertTrue $(set | grep "SECONDS" | str.sh split "." | wc -l) 
+endTest
 
-NAME="Wahoo cronjob is scheduled."
-if (( $(crontab -l | str.sh nocomment | grep run.sh | wc -l) > 1 )); then
-   failure
-else
-   success
-fi
+beginTest "Wahoo cronjob is scheduled."
+assertTrue $(crontab -l | str.sh nocomment | grep run.sh | wc -l)
+endTest

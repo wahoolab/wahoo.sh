@@ -24,7 +24,7 @@ while (( $# > 0)); do
    esac
    shift
 done
-(( $(has.sh option) )) && error.sh "$0 - $* contains an unrecognized option." && exit 1
+(( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
 
 # Typically we would clean up after ourselves, but not 
 # in this case, we will let runscript.sh take care of it.

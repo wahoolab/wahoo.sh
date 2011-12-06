@@ -1,9 +1,11 @@
 
 . ${WAHOO}/tests/functions.sh
 
-now_testing "debug.sh"
+nowTesting "debug.sh"
 
-check_for_help_option ${WAHOO}/bin/debug.sh
+beginTest "--help Option"
+assertTrue $(grep "\-\-help" ${WAHOO}/bin/route-message.sh | wc -l)
+endTest
 
 NAME="Writing to default debug.log file"
 WAHOO_DEBUG_LEVEL=3

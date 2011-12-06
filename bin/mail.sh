@@ -31,7 +31,7 @@ while (( $# > 0)); do
    esac
    shift
 done
-(( $(has.sh option) )) && error.sh "$0 - $* contains an unrecognized option." && exit 1
+(( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
 
 SUBJECT="${1}"
 WAHOO_MAIL_TO="${2}"

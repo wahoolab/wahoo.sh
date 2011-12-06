@@ -49,6 +49,7 @@ TMP=${TMP:-/tmp}
 TMPFILE=${TMP}/$$.tmp
 trap 'rm ${TMPFILE}* 2> /dev/null' 0
 
+touch ${TMPFILE}
 OIFS="${IFS}"; IFS=
 while read -r INPUT; do
    echo "${INPUT}" >> ${TMPFILE}

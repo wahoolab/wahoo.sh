@@ -1,7 +1,7 @@
 
 . ${WAHOO}/tests/functions.sh
 
-now_testing "has.sh"
+nowTesting "has.sh"
 
 check_for_help_option ${WAHOO}/bin/has.sh
 

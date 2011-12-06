@@ -11,6 +11,12 @@ usage: wahoo.sh [command] [options] [arguments]
 
 General command utility for Wahoo.
 
+   wahoo.sh tar
+
+      Create a tarball in \${WAHOO_HOME}/.. which can be used to install
+      Wahoo. tmp, log and domains directories are removed before
+      packaging the current \${WAHOO_HOME}.
+
    wahoo.sh log
  
       # Log a message to application log file \${WAHOO}/log/wahoo.log
@@ -136,6 +142,9 @@ case ${1} in
       ;;
    "version")
       echo ${WAHOO_VERSION} 
+      ;;
+   "tar") 
+      ${WAHOO}/bin/.wahoo-tarball
       ;;
    *) error.sh "$0 - Command ${1} is not recognized. Try \"wahoo.sh --help\"." && exit 1
       ;;

@@ -12,7 +12,7 @@ Options:
       Checks string for a command line option using the double-dash (--)
       format. Returns 1 if true, 0 if false.
 
-   "has_option"
+   "has_space"
 
       Checks string for a space. Returns 1 if true, 0 if false.
 
@@ -26,7 +26,7 @@ function has_option {
    # Does "${STRING}" contain one or more "--" type options? Returns 1 (true) or 0 (false).
    ARGUMENTS="${1}"
    # foo--foo is OK, first egrep gets rid of those, anything else with --foo will get counted.
-   echo "${ARGUMENTS}" | egrep -v "[A-Z|a-z|0-9]\-\-[A-Z|a-z|0-9]" | egrep "\-\-[A-Z|a-z|0-9]" | wc -l
+   echo "${ARGUMENTS}" | egrep -v "[A-Z|a-z|0-9]\-\-[A-Z|a-z|0-9]|[A-Z|a-z|0-9]\-[A-Z|a-z|0-9]" | egrep "\-[A-Z|a-z|0-9]" | wc -l
 }
 
 function has_space {

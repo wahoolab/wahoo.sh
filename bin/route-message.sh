@@ -62,10 +62,6 @@ exit 0
 
 [[ "${1}" == "--help" ]] && usage
 
-function testing {
-   [[ -n ${TESTING} ]] && echo "${1}"
-}
-
 MESSAGE_FOLDER=${TMP}/messages/$(time.sh epoch)-$$
 mkdir -p ${MESSAGE_FOLDER}
 
@@ -85,18 +81,11 @@ while (( $# > 0)); do
       --emails   ) shift; WAHOO_EMAILS="${1}" ;;
       --pagers   ) shift; WAHOO_PAGERS="${1}" ;;
       --incident ) shift; INCIDENT="${1}" ;;
-      --test     ) 
-         TESTING="TESTING" 
-         rm -rf ${MESSAGE_FOLDER} 2> /dev/null
-         MESSAGE_FOLDER=${TMP}/messages/test 
-         rm -rf ${MESSAGE_FOLDER} 2> /dev/null
-         mkdir -p ${MESSAGE_FOLDER}
-         ;;
       *) break ;;
    esac
    shift
 done
-(( $(has.sh option) )) && error.sh "$0 - $* contains an unrecognized option." && exit 1
+(( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
 
 cd ${MESSAGE_FOLDER} || (error.sh "$0 - Message folder ${MESSAGE_FOLDER} not found!" && exit 1)
 
@@ -105,25 +94,20 @@ if [[ -n ${MESSAGE_KEYWORDS} ]]; then
       case ${k} in
          CRITICAL|PAGE)
             echo ${WAHOO_PAGERS} > .pagers
-            testing "PAGERS"
             echo ${WAHOO_EMAILS} > .emails
-            testing "EMAILS"
             ;;
          WARNING|EMAIL)
             echo ${WAHOO_EMAILS} > .emails
-            testing "EMAILS"
             ;;
          INFO|LOG)
             # Nothing to do here, logging is on by default for all keywords.
             WAHOO_MESSAGE_LOG=${WAHOO_MESSAGE_LOG}
             ;;
          TRASH)
-            WAHOO_MESSAGE_LOG=
-            AUDIT_LOG=
-            testing "TRASH"
+            return
             ;;
          *)
-             error.sh "$0 - KEYWORD ${k} is not recognized! Will log this message."
+             error.sh "$0 - KEYWORD ${k} is not recognized! Will use \"LOG\" instead."
             ;;
       esac
    done
@@ -145,25 +129,27 @@ done
 
 if [[ -s .message ]]; then
    [[ -z ${SUBJECT} ]] && SUBJECT=$(cat .message | str.sh noblank | head -1) 
-   echo ${SUBJECT} > .subject
-   header > .header
+   echo ${SUBJECT} > .subject 
+   header > .header 
    for f in ${WAHOO_MESSAGE_LOG} ${MESSAGE_LOGS} ${AUDIT_LOG}; do
-      cat .header .message >> ${f}
-      testing "WRITING TO ${f}"
+      cat .header .message >> ${f} 
+      tdd.sh log "LOGFILE=${f}"
    done 
    if [[ -n ${DOCUMENT} ]]; then 
-      echo "${DOCUMENT}" > .document 
-      testing "WRITING TO .document"
+      echo "${DOCUMENT}" > .document
    fi
    if [[ -n ${INCIDENT} ]]; then
-      echo "${INCIDENT}" > .incident
-      testing "WRITING TO .incident"
+      echo "${INCIDENT}" > .incident 
    fi
    touch .send
 fi
 
-if [[ ! -f .email && ! -f .pager && ! -f .document && ! -f .incident && -z ${TESTING} ]]; then
+if [[ ! -f .emails && ! -f .pagers && ! -f .document && ! -f .incident ]]; then
    cd ..; rm -rf ${MESSAGE_FOLDER}
+else
+   for f in $(find ${MESSAGE_FOLDER} -type f); do
+      tdd.sh copy ${f}
+   done
 fi
 
 exit 0

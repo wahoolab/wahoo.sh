@@ -2,6 +2,9 @@
 
 . ${WAHOO}/tests/functions.sh
 
-now_testing "error.sh"
-check_for_help_option ${WAHOO}/bin/error.sh
+nowTesting "error.sh"
+beginTest "--help Option"
+assertTrue $(grep "\-\-help" ${WAHOO}/bin/error.sh | wc -l)
+endTest
+
 

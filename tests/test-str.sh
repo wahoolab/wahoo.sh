@@ -1,7 +1,7 @@
 
 . ${WAHOO}/tests/functions.sh
 
-now_testing "str.sh"
+nowTesting "str.sh"
 check_for_help_option ${WAHOO}/bin/str.sh
 
 NAME="String to upper-case"

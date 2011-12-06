@@ -35,6 +35,10 @@ fi
 cd ..
 
 TMP=$(pwd)/tmp
+ 
+[[ ! -d ${TMP} ]] && mkdir ${TMP}
+[[ ! -d domains ]] && mkdir domains
+[[ ! -d log ]] && mkdir log
 
 # Check if we have a copy of ksh 93. 
 if [[ ! -f ${TMP}/$(hostname)/ksh ]]; then
@@ -221,7 +225,7 @@ if [[ -f ${BACKUP_CONFIG_FILE} ]]; then
       RESTORE_VALUE=$(grep "^${PARAMETER}=" ${BACKUP_CONFIG_FILE} | cut -d"=" -f2-)
       if [[ -n "${RESTORE_VALUE}" && "${RESTORE_VALUE}" != "${CURRENT_VALUE}" ]]; then
          setuplog "Setting ${PARAMETER}=${RESTORE_VALUE}"
-         ./bin/wahoo.sh set "${PARAMETER}=${RESTORE_VALUE}"
+         ./bin/wahoo.sh config "${PARAMETER}" "${RESTORE_VALUE}"
       fi
    done
 fi

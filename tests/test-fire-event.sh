@@ -1,7 +1,11 @@
 
 . ${WAHOO}/tests/functions.sh
 
-now_testing "fire-event.sh"
-check_for_help_option ${WAHOO}/bin/fire-event.sh
+nowTesting "fire-event.sh"
+
+beginTest "--help Option"
+assertTrue $(grep "\-\-help" ${WAHOO}/bin/fire-event.sh | wc -l)
+endTest
+
 NAME="-" && failure
 

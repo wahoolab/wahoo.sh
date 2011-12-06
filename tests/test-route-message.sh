@@ -1,165 +1,163 @@
 
 . ${WAHOO}/tests/functions.sh
 
-now_testing "route-message.sh"
-check_for_help_option ${WAHOO}/bin/route-message.sh
-
+cd ${TMP}
+export WAHOO_TESTING="Y"
 KEYWORD_OVERRIDES=
 
-NAME="Email message to alternate email addresses."
-if (( $(echo "foo" | route-message.sh --keywords EMAIL --test --emails "john@doe.com" | wc -l) == 2 )); then
-   if [[ $(cat ${TMP}/messages/test/.emails) == "john@doe.com" ]]; then
-      success
-   else
-      failure
-   fi
-else
-   failure
-fi
+nowTesting "route-message.sh"
 
-NAME="Email message to alternate pager addresses."
-if (( $(echo "foo" | route-message.sh --keywords PAGE --test --pagers "jane@doe.com" | wc -l) == 3 )); then
-   if [[ $(cat ${TMP}/messages/test/.pagers) == "jane@doe.com" ]]; then
-      success
-   else
-      failure
-   fi
-else
-   failure
-fi
+beginTest "--help Option"
+assertTrue $(grep "\-\-help" ${WAHOO}/bin/route-message.sh | wc -l)
+endTest
 
-NAME="Log message to \${WAHOO_MESSAGE_LOG} - no overrides."
-if (( $(echo "foo" | route-message.sh --test | grep "WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 1 )); then
-   success
-else
-   failure
-fi
+beginTest "Testing no input (cat /dev/null)"
+cat /dev/null | route-message.sh
+assertFalse $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+endTest
 
-NAME="Route a CRITICAL message - no overrides."
-if (( $(echo foo | route-message.sh --test --keywords CRITICAL | egrep "PAGERS|EMAILS|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 3 )); then
-   success
-else
-   failure
-fi
+beginTest "Testing without any options (same as --keywords LOG)"
+echo foo | route-message.sh 
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+endTest
 
-NAME="Route a PAGE - no overrides."
-if (( $(echo foo | route-message.sh --test --keywords PAGE | egrep "PAGERS|EMAILS|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 3 )); then
-   success
-else
-   failure
-fi
+beginTest "Testing --keywords INFO"
+echo foo | route-message.sh --keywords INFO
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+endTest
 
-NAME="Route a WARNING - no overrides."
-if (( $(echo foo | route-message.sh --test --keywords WARNING | egrep "PAGERS|EMAILS|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 2 )); then
-   success
-else
-   failure
-fi
+beginTest "Testing --keywords LOG"
+echo foo | route-message.sh --keywords LOG
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+endTest
 
-NAME="Route a EMAIL - no overrides."
-if (( $(echo foo | route-message.sh --test --keywords EMAIL | egrep "PAGERS|EMAILS|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 2 )); then
-   success
-else
-   failure
-fi
+beginTest "Testing --keywords WARNING"
+echo foo | route-message.sh --keywords WARNING
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(exist .emails .header .subject .message .send)
+assertFalse $(exist .pagers .incident .document)
+endTest
 
-NAME="Route a INFO - no overrides."
-if (( $(echo foo | route-message.sh --test --keywords INFO | egrep "PAGERS|EMAILS|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 1 )); then
-   success
-else
-   failure
-fi
+beginTest "Testing --keywords EMAIL"
+echo foo | route-message.sh --keywords EMAIL
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(exist .emails .header .subject .message .send)
+assertFalse $(exist .pagers .incident .document)
+endTest
 
-NAME="Route a LOG - no overrides."
-if (( $(echo foo | route-message.sh --test --keywords LOG | egrep "PAGERS|EMAILS|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 1 )); then
-   success
-else
-   failure
-fi
+beginTest "Testing --keywords CRITICAL"
+echo foo | route-message.sh --keywords CRITICAL
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(exist .pagers .emails .header .subject .message .send)
+assertFalse $(exist .incident .document)
+endTest
 
-NAME="Route a TRASH - no overrides."
-if (( $(echo foo | route-message.sh --test --keywords TRASH | egrep "PAGERS|EMAILS|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 0 )); then
-   success
-else
-   failure
-fi
+beginTest "Testing --keywords PAGE"
+echo foo | route-message.sh --keywords PAGE
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(exist .pagers .emails .header .subject .message .send)
+assertFalse $(exist .incident .document)
+endTest
 
-NAME="Route a --nolog - no overrides."
-if (( $(echo foo | route-message.sh --test --nolog | egrep "PAGERS|EMAILS|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 0 )); then
-   success
-else
-   failure
-fi
+beginTest "Testing --keywords TRASH"
+echo foo | route-message.sh --keywords TRASH
+assertFalse $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertFalse $(exist .pagers .emails .header .subject .message .send .incident .document)
+endTest
 
-KEYWORD_OVERRIDES="CRITICAL=LOG"
-NAME="Route a CRITICAL message - LOG override."
-if (( $(echo foo | route-message.sh --test --keywords CRITICAL | egrep "PAGERS|EMAILS|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 1 )); then
-   success
-else
-   failure
-fi
+beginTest "Testing --emails option"
+echo foo | route-message.sh --keywords EMAIL --emails "john@doe.com" 
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(exist .emails .header .subject .message .send)
+assertFalse $(exist .pagers .incident .document)
+endTest
 
-KEYWORD_OVERRIDES="CRITICAL=LOG,WARNING=TRASH,PAGE=EMAIL,INFO=EMAIL"
-NAME="Route a PAGE message - EMAIL override."
-if (( $(echo foo | route-message.sh --test --keywords PAGE | egrep "PAGERS|EMAILS|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 2 )); then
-   success
-else
-   failure
-fi
+beginTest "Testing --pagers option"
+echo foo | route-message.sh --keywords PAGE --pagers "jane@doe.com"
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(exist .pagers .emails .header .subject .message .send)
+assertFalse $(exist .incident .document) 
+assertTrue $(grepFile ".pagers" "jane@doe.com")
+endTest
+
+beginTest "Testing --nolog option"
+echo foo | route-message.sh --nolog
+assertFalse $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+endTest
+
+beginTest "Testing --audit"
+echo foo | route-message.sh --audit 
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(grepLog "LOGFILE=${WAHOO_AUDIT_LOG}")
+assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+endTest
+
+beginTest "Testing --audit --nolog"
+echo foo | route-message.sh --audit --nolog
+assertFalse $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(grepLog "LOGFILE=${WAHOO_AUDIT_LOG}")
+assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+endTest
+
+beginTest "Testing --log ${TMP}/tdd/alt.log"
+echo foo | route-message.sh --log ${TMP}/tdd/alt.log
+assertFalse $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(grepFile "alt.log" "foo")
+assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+endTest
+
+beginTest "Testing --incident foo"
+echo foo | route-message.sh --incident foo
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(exist .header .subject .message .send .incident)
+assertFalse $(exist .emails .pagers .documents)
+endTest
+
+beginTest "Testing --incident foo --keywords EMAIL"
+echo foo | route-message.sh --incident foo --keywords EMAIL
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(exist .header .subject .message .send .incident .emails)
+assertFalse $(exist .pagers .documents)
+endTest
+
+beginTest "Testing --document foo.txt"
+echo foo | route-message.sh --document foo.txt
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(grepFile ".document" "foo.txt")
+assertTrue $(exist .header .subject .message .send)
+assertFalse $(exist .emails .pagers .incident)
+endTest
+
+KEYWORD_OVERRIDES="CRITICAL=LOG, WARNING=LOG, PAGE=EMAIL"
+
+beginTest "Testing --keywords CRITICAL with KEYWORD_OVERRIDE"
+echo foo | route-message.sh --keywords CRITICAL 
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+endTest
+
+beginTest "Testing --keywords WARNING with KEYWORD_OVERRIDE"
+echo foo | route-message.sh --keywords WARNING
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+endTest
+
+beginTest "Testing --keywords PAGE with KEYWORD_OVERRIDE"
+echo foo | route-message.sh --keywords PAGE
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(exist .emails .header .subject .message .send)
+assertFalse $(exist .pagers .incident .document)
+endTest
 
 KEYWORD_OVERRIDES="CRITICAL=LOG,WARNING=TRASH,PAGE=TYPO,INFO=EMAIL"
-NAME="Route a PAGE message - maps to bad override TYPO"
-echo foo | route-message.sh --test --keywords PAGE 2> $$.tmp 1> /dev/null
-if (( $(cat $$.tmp | wc -l) == 1 )); then
-   success
-else
-   failure
-fi
-rm $$.tmp 2> /dev/null
-
-KEYWORD_OVERRIDES=
-NAME="Route message with --audit --nolog"
-if (( $(echo foo | route-message.sh --test --audit --nolog | egrep "WRITING TO ${WAHOO_AUDIT_LOG}|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 1 )); then
-   success
-else
-   failure
-fi
-
-KEYWORD_OVERRIDES=
-NAME="Route message with --audit"
-if (( $(echo foo | route-message.sh --test --audit --nolog | egrep "WRITING TO ${WAHOO_AUDIT_LOG}|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 1 )); then
-   success
-else
-   failure
-fi
-
-NAME="Route message to alternate log file."
-rm /tmp/alt.log 2> /dev/null
-if (( $(echo foo | route-message.sh --test --log /tmp/alt.log  | egrep "WRITING TO /tmp/alt.log|WRITING TO ${WAHOO_MESSAGE_LOG}" | wc -l) == 1 )); then
-   success
-else
-   failure
-fi
-
-NAME="Route message with incident."
-if (( $(echo foo | route-message.sh --test --incident "gem" | wc -l) == 2 )); then
-   if [[ $(cat ${TMP}/messages/test/.incident) == "gem" ]]; then
-      success
-   else
-      failure
-   fi
-else
-   failure
-fi
-
-NAME="Route message with no input."
-if (( $(cat /dev/null | route-message.sh --test | wc -l) == 0 )); then
-   if [[ $(ls ${TMP}/messages/test/.* | ec -l) == 0 ]]; then
-      success
-   else
-      failure
-   fi
-else
-   failure
-fi
+NAME="Testing --keywords PAGE with an invalid KEYWORD_OVERRIDE"
+echo foo | route-message.sh --keywords PAGE 2> ${TMP}/tdd/stderr
+# An error in the keyword should still result in the message being logged.
+assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+assertTrue $(grepFile "stderr" "KEYWORD TYPO is not recognized")
+endTest
 
