@@ -1,7 +1,13 @@
 
 . ${WAHOO}/tests/functions.sh
 
-nowTesting ".wahoo-path.sh"
-check_for_help_option ${WAHOO}/bin/.wahoo-path.sh
+cd ${TMP}
+export WAHOO_TESTING="Y"
+
+nowTesting "wahoo-path.sh"
+
+beginTest "--help Option"
+assertTrue $(grep "\-\-help" ${WAHOO}/bin/.wahoo-path.sh | wc -l)
+endTest
 
 

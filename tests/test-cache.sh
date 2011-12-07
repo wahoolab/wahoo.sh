@@ -1,16 +1,26 @@
 
 . ${WAHOO}/tests/functions.sh
 
+cd ${TMP}
+export WAHOO_TESTING="Y"
+
 nowTesting "cache.sh"
 
 beginTest "--help Option"
-assertTrue $(grep "\-\-help" ${WAHOO}/bin/route-message.sh | wc -l)
+assertTrue $(grep "\-\-help" ${WAHOO}/bin/cache.sh | wc -l)
 endTest
 
-exit
+beginTest "cache.sh set foo bar"
+KEY=$(time.sh epoch)
+assertUndefined $(cache.sh get ${KEY})
+cache.sh set ${KEY} "bar"
+assertTrue $([[ $(cache.sh get ${KEY}) == "bar" ]] && echo 1)
+endTest
 
-NAME="cache.sh set foo bar" 
-NAME="cache.sh get foo"
-NAME="cat foo.txt | cache.sh set foo" 
-NAME="cache.sh get foo" 
+beginTest "cat file | cache.sh set \"foo\""
+set > ${TMP}/tdd/file1
+cat ${TMP}/tdd/file1 | cache.sh set "foo"
+cache.sh get "foo" > ${TMP}/tdd/file2
+assertFalse $(diff ${TMP}/tdd/file1 ${TMP}/tdd/file2 | wc -l)
+endTest
 

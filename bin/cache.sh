@@ -13,7 +13,8 @@ Simple file system based key value store.
    # Get the value of foo.
    cache.sh get foo
 
-   # Store input from standard in. 
+   # Store input from standard in. In this case value
+   # can be more than one line.
    cat foo.txt | cache.sh set foo
    
 EOF

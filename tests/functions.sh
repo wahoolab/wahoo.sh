@@ -90,6 +90,10 @@ function assertTrue {
    fi
 }
 
+function assertFile {
+   [[ ! -f ${1} ]] && fail
+}
+
 function assertFalse {
    if [[ -z ${1} ]]; then
       fail

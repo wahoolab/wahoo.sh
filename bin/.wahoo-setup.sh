@@ -257,6 +257,9 @@ EOF
 ) > ${WAHOO_HOME}/run.sh
 chmod 700 ${WAHOO_HOME}/run.sh
 
+# Create the default events.cfg file in your domain directory if it does not exist.
+${WAHOO}/bin/.wahoo-create-events-cfg.sh
+
 cat <<EOF
 $LINE1
 In order to enable automated schedules and provide event responses you will 
