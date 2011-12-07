@@ -1,34 +1,38 @@
 
 . ${WAHOO}/tests/functions.sh
 
+cd ${TMP}
+export WAHOO_TESTING="Y"
+
 nowTesting "wahoo.sh"
-check_for_help_option ${WAHOO}/bin/wahoo.sh
 
-NAME="log to wahoo.log" && todo
+beginTest "--help Option"
+assertTrue $(grep "\-\-help" ${WAHOO}/bin/wahoo.sh | wc -l)
+endTest
 
-NAME="version returns value"
-if (( $(wahoo.sh version) > 0 )); then
-   success
-else
-   failure
-fi
+beginTest "wahoo.sh version"
+assertTrue $(wahoo.sh version)
+endTest
 
-NAME="Set WAHOO_TEST parameter to Null"
+beginTest "wahoo.sh log"
+PATTERN="x $(date) x"
+wahoo.sh log "${PATTERN}"
+assertTrue $(grep "${PATTERN}" ${WAHOO_APP_LOG} | wc -l)
+endTest
+
+beginTest "wahoo.sh config WAHOO_TEST \"\""
 wahoo.sh config WAHOO_TEST ""
-CHECK=$(grep "WAHOO_TEST" ${LOCAL_CONFIG_FILE} | awk -F"=" '{print $2}')
-if [[ -z ${CHECK} ]]; then
-   success
-else
-   failure
-fi
+assertUndefined $(grep "WAHOO_TEST" ${LOCAL_CONFIG_FILE} | awk -F"=" '{print $2}')
+endTest
 
-NAME="Set WAHOO_TEST parameter to 'X Y Z'"
+beginTest "wahoo.sh config WAHOO_TEST \"X Y Z\""
 wahoo.sh config WAHOO_TEST "X Y Z"
-CHECK=$(grep "WAHOO_TEST=\"X Y Z\"" ${LOCAL_CONFIG_FILE} | awk -F"=" '{print $2}')
-if [[ -n ${CHECK} ]]; then
-   success
-else
-   failure
-fi
+assertTrue $([[ "\"X Y Z\"" == $(grep "WAHOO_TEST=\"X Y Z\"" ${LOCAL_CONFIG_FILE} | awk -F"=" '{print $2}') ]] && echo 1)
+endTest
+
+beginTest "wahoo.sh tar"
+TARFILE=$(wahoo.sh tar)
+assertTrue $([[ -s ${TARFILE} ]] && echo 1)
+endTest
 
 

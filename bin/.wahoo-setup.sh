@@ -147,6 +147,9 @@ OSTYPE=${OSTYPE}
 # Wahoo temporary directory. Used for temp space of course.
 TMP=${WAHOO_HOME}/tmp
 
+# Application log file.
+WAHOO_APP_LOG=\${WAHOO}/log/wahoo.log
+
 # 0=Off, 1=Minimal Logging, 2=Debug, 3=Maximum Logging
 # Usually this should be set to 1.
 WAHOO_DEBUG_LEVEL=1
@@ -218,21 +221,24 @@ EOF
 ) > ~/.wahoo
 
 if [[ -f ${BACKUP_CONFIG_FILE} ]]; then
-   setuplog "Merging ${BACKUP_CONFIG_FILE} with ~/.wahoo."
-   cat ~/.wahoo | egrep "^[A-Z].*=" | egrep -v "^#|^WAHOO=|^WAHOO_HOME=" | while read LINE; do
-      PARAMETER=$(echo ${LINE} | awk -F"=" '{print $1}')
-      CURRENT_VALUE=$(echo ${LINE} | cut -d"=" -f2-)
-      RESTORE_VALUE=$(grep "^${PARAMETER}=" ${BACKUP_CONFIG_FILE} | cut -d"=" -f2-)
-      if [[ -n "${RESTORE_VALUE}" && "${RESTORE_VALUE}" != "${CURRENT_VALUE}" ]]; then
-         setuplog "Setting ${PARAMETER}=${RESTORE_VALUE}"
-         ./bin/wahoo.sh config "${PARAMETER}" "${RESTORE_VALUE}"
+   (
+   # Look through the new file.
+   cat ~/.wahoo | while read -r NEWLINE; do
+      # If the line is a parameter...
+      if $(echo "${NEWLINE}" | egrep "^[A-Z].*=" | egrep -v "^#|^WAHOO=|^WAHOO_HOME=" 1> /dev/null); then
+          # Get the line from the old file.
+          PARAMETER=$(echo ${NEWLINE} | awk -F"=" '{print $1}')
+          OLDLINE=$(grep "^${PARAMETER}=" ${BACKUP_CONFIG_FILE})
+          # If the lines do not match.
+          if [[ "${NEWLINE}" != "${OLDLINE}" ]]; then
+             NEWLINE="${OLDLINE}"
+          fi
       fi
+      echo "${NEWLINE}"
    done
+   ) > ~/.wahoo0
+   mv ~/.wahoo0 ~/.wahoo
 fi
-
-grep "^[A-Z].*=" ~/.wahoo | while read LINE; do
-   setuplog "${LINE}"
-done
 
 (
 cat <<EOF

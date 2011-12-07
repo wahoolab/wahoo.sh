@@ -78,6 +78,10 @@ function assertDefined {
    [[ -z ${1} ]] && fail
 }
 
+function assertUndefined {
+   [[ -n ${1} ]] && fail
+}
+
 function assertTrue {
    if [[ -z ${1} ]]; then
       fail

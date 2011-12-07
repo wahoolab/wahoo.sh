@@ -1,7 +1,10 @@
 
 . ${WAHOO}/tests/functions.sh
 
-nowTesting "Wahoo Installation"
+cd ${TMP}
+export WAHOO_TESTING="Y"
+
+nowTesting "This Installation"
 
 # Verify variable have values when required.
 (
@@ -20,11 +23,8 @@ SIMPLE_HOSTNAME
 EOF
 ) | while read p; do
    beginTest "Variable ${p} is defined."
-   if [[ -n $(echo $(eval "echo \${${p}}")) ]]; then
-      success
-   else
-      failure
-   fi
+   assertDefined $(echo $(eval "echo \${${p}}"))
+   endTest
 done
 
 beginTest "\${TMP} directory exists."
