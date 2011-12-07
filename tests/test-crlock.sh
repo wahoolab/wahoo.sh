@@ -1,6 +1,8 @@
 
-
 . ${WAHOO}/tests/functions.sh
+
+cd ${TMP}
+export WAHOO_TESTING="Y"
 
 nowTesting "crlock.sh"
 

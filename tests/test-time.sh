@@ -2,38 +2,29 @@
 
 . ${WAHOO}/tests/functions.sh
 
+cd ${TMP}
+export WAHOO_TESTING="Y"
+
 nowTesting "time.sh"
 
-check_for_help_option ${WAHOO}/bin/time.sh
-NAME="time.sh epoch"
-if [[ -z $(time.sh epoch) ]]; then
-   failure
-else
-   if (( $(time.sh epoch) > 0 )); then
-      success
-   else
-      failure
-   fi
-fi
+beginTest "--help Option"
+assertTrue $(grep "\-\-help" ${WAHOO}/bin/time.sh | wc -l)
+endTest
 
-NAME="time.sh epoch --hours"
-if [[ -z $(time.sh epoch --hours) ]]; then
-   failure
-else
-   if (( $(time.sh epoch) > $(time.sh epoch --hours) && $(time.sh epoch --hours) > 0 )); then
-      success
-   else
-      failure
-   fi
-fi
+beginTest "time.sh epoch"
+assertDefined $(time.sh epoch) 
+assertTrue $(time.sh epoch)
+endTest
 
-NAME="time.sh epoch --minutes" 
-if [[ -z $(time.sh epoch --minutes) ]]; then
-   failure
-else
-   if (( $(time.sh epoch hours) > $(time.sh epoch --minutes) && $(time.sh epoch --minutes) > 0 )); then
-      success
-   else
-      failure
-   fi
-fi
+beginTest "time.sh epoch --hours"
+assertDefined $(time.sh epoch --hours)
+assertTrue $(time.sh epoch --hours)
+assertTrue $( (($(time.sh epoch) > $(time.sh epoch --hours))) && echo 1)
+endTest
+
+beginTest "time.sh epoch --minutes"
+assertDefined $(time.sh epoch --minutes)
+assertTrue $(time.sh epoch --minutes)
+assertTrue $( (($(time.sh epoch) > $(time.sh epoch --minutes))) && echo 1)
+endTest
+

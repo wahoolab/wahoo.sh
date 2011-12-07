@@ -1,50 +1,56 @@
 
 . ${WAHOO}/tests/functions.sh
 
+cd ${TMP}
+export WAHOO_TESTING="Y"
+
 nowTesting "str.sh"
-check_for_help_option ${WAHOO}/bin/str.sh
 
-NAME="String to upper-case"
-TEST="$(echo 'a|][_*@z' | str.sh upper) $(echo 'a|][_*@z' | str.sh ucase)"
-if [[ "${TEST}" == "A|][_*@Z A|][_*@Z" ]]; then
-   success
-else
-   failure
-fi
+beginTest "--help Option"
+assertTrue $(grep "\-\-help" ${WAHOO}/bin/str.sh | wc -l)
+endTest
 
-NAME="String to lower-case"
-TEST="$(echo 'A|][_*@Z' | str.sh lower) $(echo 'A|][_*@Z' | str.sh lcase)"
-if [[ "${TEST}" == "a|][_*@z a|][_*@z" ]]; then
-   success
-else
-   failure
-fi
+beginTest "upper and ucase"
+assertTrue $([[ "$(echo 'a|][_*@z' | str.sh upper) $(echo 'a|][_*@z' | str.sh ucase)" == "A|][_*@Z A|][_*@Z" ]] && echo 1)
+endTest
 
-NAME="Split string a:b:c"
-(
-cat <<EOF
-a
-b
-c
-EOF
-) > /tmp/A$$
-echo "a:b:c" | str.sh split > /tmp/B$$
-if (( $(diff /tmp/A$$ /tmp/B$$ | wc -l) == 0 )); then
-   success
-else
-   failure
-fi
+beginTest "lower and lcase"
+assertTrue $([[ "$(echo 'A|][_*@Z' | str.sh lower) $(echo 'A|][_*@Z' | str.sh lcase)" == "a|][_*@z a|][_*@z" ]] && echo 1)
+endTest
+
+beginTest "split a:b:c"
+printf "a\nb\nc\n" > ${TMP}/tdd/file1
+echo "a:b:c" | str.sh split > ${TMP}/tdd/file2
+assertFalse $(diff ${TMP}/tdd/file1 ${TMP}/tdd/file2 | wc -l)
+endTest
 
 for d in ";" "-" "," "|"; do
-   NAME="Split string a${d}b${d}c"
-   echo "a${d}b${d}c" | str.sh split "${d}" > /tmp/B$$
-   if (( $(diff /tmp/A$$ /tmp/B$$ | wc -l) == 0 )); then
-      success
-   else
-      failure
-   fi
+   beginTest "split a${d}b${d}c"
+   printf "a\nb\nc\n" > ${TMP}/tdd/file1
+   echo "a${d}b${d}c" | str.sh split "${d}" > ${TMP}/tdd/file2
+   assertFalse $(diff ${TMP}/tdd/file1 ${TMP}/tdd/file2 | wc -l)
+   endTest
 done
 
-rm /tmp/A$$ /tmp/B$$ 2> /dev/null
+beginTest "nospace"
+assertTrue $( [[ $(echo "foo foo" | str.sh nospace) == "foofoo" ]] && echo 1)
+endTest
 
+beginTest "noblank"
+printf "a\n\nb\n\nc" > ${TMP}/tdd/file1
+cat ${TMP}/tdd/file1 | str.sh noblank > ${TMP}/tdd/file2
+printf "a\nb\nc" > ${TMP}/tdd/file1
+assertFalse $(diff ${TMP}/tdd/file1 ${TMP}/tdd/file2 | wc -l)
+endTest
+
+beginTest "nocomment"
+printf "a\n#b\nc" > ${TMP}/tdd/file1
+cat ${TMP}/tdd/file1 | str.sh nocomment > ${TMP}/tdd/file2
+printf "a\nc" > ${TMP}/tdd/file1
+assertFalse $(diff ${TMP}/tdd/file1 ${TMP}/tdd/file2 | wc -l)
+endTest
+
+beginTest "left"
+assertTrue $( [[ $(echo "   foo" | str.sh left) == "foo" ]] && echo 1)
+endTest
 

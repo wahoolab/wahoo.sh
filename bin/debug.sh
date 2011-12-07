@@ -1,4 +1,5 @@
 
+
 function usage {
 cat <<EOF
 usage: debug.sh [options] "[string]"

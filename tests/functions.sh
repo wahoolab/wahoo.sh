@@ -70,24 +70,28 @@ function grepLog {
    grepFile tdd.log "${1}"
 }
 
+function fail {
+   touch ${TMP}/tdd/failure
+}
+
+function assertDefined {
+   [[ -z ${1} ]] && fail
+}
+
 function assertTrue {
    if [[ -z ${1} ]]; then
-      touch ${TMP}/tdd/failure
+      fail
    elif (( ${1} == 0 )); then
-      touch ${TMP}/tdd/failure
+      fail
    fi
 }
 
 function assertFalse {
    if [[ -z ${1} ]]; then
-      touch ${TMP}/tdd/failure
+      fail
    elif (( ${1} == 1 )); then
-      touch ${TMP}/tdd/failure
+      fail
    fi
-}
-
-function fail {
-   touch ${TMP}/tdd/failure
 }
 
 function endTest {

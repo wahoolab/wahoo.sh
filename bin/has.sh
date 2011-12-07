@@ -37,9 +37,11 @@ function has_space {
 
 case "${1}" in
    "option") 
-      has_option "${2}" ;;
+      has_option "${2}" 
+      ;;
    "space")
-      has_space "${2}" ;;
+      has_space "${2}" 
+      ;;
    *)
       error.sh "has.sh - Error" ;;
 esac
