@@ -14,11 +14,7 @@ fi
 [ -f .wahoo ] && \$(. .wahoo 2> /dev/null)
 [ -f ~/.wahoo ] && . ~/.wahoo
 
-${WAHOO}/bin/.wahoo-check-events.sh 1>> ${WAHOO}/log/stdout 2>> ${WAHOO}/log/stderr
-
-if [[ -f \${WAHOO}/domains/\${WAHOO_DOMAIN}/events.cfg ]]; then
-   .wahoo-check-events.sh --file \${WAHOO}/domains/\${WAHOO_DOMAIN}/events.cfg 1>> \${WAHOO}/log/stdout 2>> \${WAHOO}/log/stderr
-fi
+${WAHOO}/bin/.wahoo-check-tasks.sh
 
 EOF
 ) > ${WAHOO}/run.sh

@@ -5,7 +5,7 @@
 [[ -z ${WAHOO} ]] && echo "\${WAHOO} is not defined!" && exit 1
 [[ ! -f /tmp/wahoo ]] && echo "/tmp/wahoo not found!" && exit 1
 
-cd ${WAHOO}/tests
+cd ${WAHOO}/test
 
 test-install.sh
 test-has.sh

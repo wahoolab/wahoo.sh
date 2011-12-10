@@ -8,9 +8,5 @@ fi
 [ -f .wahoo ] && $(. .wahoo 2> /dev/null)
 [ -f ~/.wahoo ] && . ~/.wahoo
 
-/home/lab/Dropbox/wahoo/bin/.wahoo-check-events.sh 1>> /home/lab/Dropbox/wahoo/log/stdout 2>> /home/lab/Dropbox/wahoo/log/stderr
-
-if [[ -f ${WAHOO}/domains/${WAHOO_DOMAIN}/events.cfg ]]; then
-   .wahoo-check-events.sh --file ${WAHOO}/domains/${WAHOO_DOMAIN}/events.cfg 1>> ${WAHOO}/log/stdout 2>> ${WAHOO}/log/stderr
-fi
+/home/lab/Dropbox/wahoo/bin/.wahoo-check-tasks.sh
 

@@ -1,5 +1,5 @@
 
-. ${WAHOO}/tests/functions.sh
+. ${WAHOO}/test/functions.sh
 
 cd ${TMP}
 export WAHOO_TESTING="Y"

@@ -1,5 +1,5 @@
 
-. ${WAHOO}/tests/functions.sh
+. ${WAHOO}/test/functions.sh
 
 cd ${TMP}
 export WAHOO_TESTING="Y"
@@ -13,13 +13,13 @@ endTest
 beginTest "crtask.sh --key foo --command \"echo foo\""
 crtask.sh --remove foo
 crtask.sh --key foo --command "echo foo > ${TMP}/tdd/foo.log" || fail
-assertTrue $(grep "echo foo" ${TMP}/tasks/foo | wc -l)
+assertTrue $(grep "echo foo" ${WAHOO}/task/foo | wc -l)
 endTest
 
 exit 0
 
 beginTest "crtask.sh --remove foo"
 crtask.sh --remove foo
-assertFalse $(grep "echo foo" ${TMP}/tasks/foo 2> /dev/null | wc -l)
+assertFalse $(grep "echo foo" ${WAHOO}/task/foo 2> /dev/null | wc -l)
 endTest
 

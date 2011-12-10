@@ -27,9 +27,13 @@ Options:
 
      The command you want to execute.
 
-   --domain
+   --domain 
 
-     Applies task to all servers in Wahoo domain.
+     Task applies to the Wahoo domain.
+
+   --hostname [name-of-host]
+
+     Task only applies to [name-of-host].
 
    --minutes [n]
 
@@ -52,14 +56,13 @@ exit 0
 
 [[ "${1}" == "--help" ]] && usage
 
-TASK_DIR=${TMP}/tasks
-[[ ! -d ${TASK_DIR} ]] && mkdir ${TASK_DIR}
-
+TASK_DIR=${WAHOO}/task
 TASK_KEY=
 SCHEDULE="* * * * *"
 QUIT_TASK_AFTER_MINUTES=
 TASK_SCOPE="$(hostname)"
 FORCE=
+TASK_HOST=
 while (( $# > 0)); do
    case $1 in
       --key) shift; TASK_KEY="${1}" ;;
@@ -67,9 +70,9 @@ while (( $# > 0)); do
       --schedule) shift; SCHEDULE="${1}" ;;
       --minutes) shift; QUIT_TASK_AFTER_MINUTES="${1}" ;;
       --hours) shift; ((QUIT_TASK_AFTER_MINUTES=60*${1})) ;;
-      --domain) shift; TASK_SCOPE="${WAHOO_DOMAIN}" ;;
       --remove) shift; rm ${TASK_DIR}/${1} 2> /dev/null; exit 0 ;;
       --force) FORCE="FORCE" ;;
+      --hostname) shift; TASK_HOST="${1}" ;;
       *) break ;;
    esac
    shift
@@ -79,10 +82,15 @@ done
 [[ -z ${TASK_KEY} ]] && error.sh "$0 - Option \"--key [key]\" is required!" && exit 1
 [[ -z ${COMMAND} ]] && error.sh "$0 - Option \"--commmand [command]\" is required!" && exit 1
 
-TASK_FILE=${TASK_DIR}/${TASK_KEY}
+if [[ -z ${TASK_HOST} ]]; then
+   TASK_FILE=${TASK_DIR}/${TASK_KEY}
+else
+   [[ ! -d ${TASK_DIR}/${TASK_HOST} ]] && mkdir ${TASK_DIR}/${TASK_HOST}
+   TASK_FILE=${TASK_DIR}/${TASK_HOST}/${TASK_KEY}
+fi
 
 if [[ ! -f ${TASK_FILE} || -n ${FORCE} ]]; then
-   echo "${TASK_SCOPE}:${TASK_KEY}:${SCHEDULE}:$(time.sh epoch --minutes):${QUIT_TASK_AFTER_MINUTES}:${COMMAND}" > ${TASK_FILE} 
+   echo "${SCHEDULE}:$(time.sh epoch --minutes):${QUIT_TASK_AFTER_MINUTES}:${COMMAND}" > ${TASK_FILE} 
 else
    error.sh "$0 - Task file for task key ${TASK_KEY} already exists!" && exit 1   
 fi
