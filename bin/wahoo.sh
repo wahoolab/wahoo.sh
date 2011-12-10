@@ -14,7 +14,7 @@ General command utility for Wahoo.
    wahoo.sh tar
 
       Create a tarball in \${WAHOO_HOME}/.. which can be used to install
-      Wahoo. tmp, log and domains directories are removed before
+      Wahoo. tmp, log and domain directories are removed before
       packaging the current \${WAHOO_HOME}.
 
    wahoo.sh log
@@ -48,7 +48,7 @@ General command utility for Wahoo.
       # Edit the LOCAL_CONFIG_FILE (~/.wahoo).
       wahoo.sh config 
  
-      # Edit the DOMAIN_CONFIG_FILE (\${WAHOO}/domains/\${WAHOO_DOMAIN}/.wahoo)
+      # Edit the DOMAIN_CONFIG_FILE (\${WAHOO}/domain/\${WAHOO_DOMAIN}/.wahoo)
       wahoo.sh config --domain
 
       # Set or add parameter "PROD" to "Y" in LOCAL_CONFIG_FILE.

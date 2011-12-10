@@ -1,6 +1,6 @@
 
 
-# Note: ${WAHOO}/domains/${WAHOO_DOMAIN}/bin and ${WAHOO}/bin are added in .wahoo-setup.sh, not here.
+# Note: ${WAHOO}/domain/${WAHOO_DOMAIN}/bin and ${WAHOO}/bin are added in .wahoo-setup.sh, not here.
 
 WAHOO=${WAHOO:-$(pwd)}
 

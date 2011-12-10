@@ -5,26 +5,30 @@
 
 debug.sh -2 "$(basename $0)"
 
-if ! $(crlock.sh --try 60 --expire 3600 --fail 5 --max-processes 5 wahoo-check-jobs); then
+if ! $(crlock.sh --try 60 --expire 3600 --fail 5 --max-processes 5 wahoo-check-events); then
    exit 1
 fi
 
-trap 'rmlock.sh wahoo-check-jobs' 0
+trap 'rmlock.sh wahoo-check-events' 0
 
-JOB_FILE=${WAHOO}/bin/.wahoo-jobs
+# Defined in ~/.wahoo but can be defined using --file option also.
+# WAHOO_EVENTS_FILE=
+
 TMPID=${RANDOM}
 EVENT_NAME=
 TMPFILE=${TMP}/$$.tmp
 
 while (( $# > 0)); do
    case $1 in
-      --file) shift; JOB_FILE="${1}" ;;
+      --file) shift; WAHOO_EVENTS_FILE="${1}" ;;
       --event) shift; EVENT_NAME="${1}" ;;
       *) break ;;
    esac
    shift
 done
 (( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
+
+[[ -z ${WAHOO_EVENTS_FILE} ]] && exit 0
 
 # Typically we would clean up after ourselves, but not 
 # in this case, we will let runscript.sh take care of it.
@@ -67,7 +71,7 @@ SCHEDULE=
 EVENT=
 
 # -r option on read prevents the "\" from being removed from lines in the file.
-cat ${JOB_FILE} | str.sh noblank nocomment left | while read -r l; do
+cat ${WAHOO_EVENTS_FILE} | str.sh noblank nocomment left | while read -r l; do
    # echo "l=${l}"
    # Lines that match ^@ are a new schedule.
    if (( $(test_regex "^@")  )); then

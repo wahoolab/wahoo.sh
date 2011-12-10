@@ -6,9 +6,26 @@
 
 SCRIPT="${1}"
 TMPFILE="${TMP}/$$.tmp"
-trap 'rm ${TMPFILE}* ${SCRIPT} 2> /dev/null' 0
+# trap 'rm ${TMPFILE}* ${SCRIPT} 2> /dev/null' 0
 
-${SCRIPT} 1>> ${TMPFILE}.stdout 2>> ${TMPFILE}.stderr
+(
+cat <<EOF
+#!/tmp/wahoo
+
+[[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
+[[ -f ~/.wahoo ]] && . ~/.wahoo
+
+${SCRIPT}
+EOF
+) > ${TMPFILE}
+
+chmod 700 ${TMPFILE}
+
+echo $LINE1
+cat ${TMPFILE}
+echo $LINE1
+
+${TMPFILE} 1>> ${TMPFILE}.stdout 2>> ${TMPFILE}.stderr
 
 if [[ -s ${TMPFILE}.stderr ]]; then
 (

@@ -95,11 +95,15 @@ TRIES=0
 AQUISITION="FAILED"
 
 p=0
+debug.sh -3 "MAX_PROCESSES=${MAX_PROCESSES}"
 if (( ${MAX_PROCESSES:-0} > 0 )); then
+   ls *.trying 2> /dev/null | debug.sh -3
    cat *.trying 2> /dev/null | while read t; do
+      debug.sh -3 "t=${t}"
       # We are only interested in counting active processes.
       (( ${t} > (($(time.sh epoch)-60)) )) && ((p=p+1))
    done
+   debug.sh -3 "p=${p}"
    if (( ${p} >= ${MAX_PROCESSES} )); then
       error.sh "$0 - Too many processes are trying to aquire lock ${LOCK_KEY}." && exit 1
    fi
@@ -107,6 +111,7 @@ fi
 
 while ((1)); do
    ((TRIES=TRIES+1))
+   debug.sh -3 "TRIES=${TRIES}"
    # Lock is available if there are no .lock files.
    if (( $(ls *.lock 2> /dev/null | wc -l) == 0 )); then
       echo ${EXPIRE_TIME} > $$.lock && AQUISITION="SUCCESSFUL" && break

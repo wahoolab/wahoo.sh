@@ -52,6 +52,11 @@ Options:
      # Match if it is 5:15 PM on Monday.
      crontab.sh --minute 15 -hour 17 -day-of-week 1
 
+   --schedule [minute] [hour] [day-of-month] [month] [day-of-week]
+
+     crontab.sh --schedule "* * * * *"
+
+
 EOF
 exit 0
 }

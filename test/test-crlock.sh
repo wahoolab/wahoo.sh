@@ -11,14 +11,17 @@ assertTrue $(grep "\-\-help" ${WAHOO}/bin/crlock.sh | wc -l)
 endTest
 
 beginTest "crlock.sh foo"
-rmlock.sh foo && crlock.sh foo
-$(crlock.sh foo) && fail
+rmlock.sh foo; crlock.sh foo
+# If the lock was aquired we won't be able to get it.
+if $(crlock.sh foo); then
+   fail
+fi
 endTest
 
 beginTest "crlock.sh --remove foo"
 rmlock.sh foo && crlock.sh foo
-crlock.sh foo && fail
 crlock.sh --remove foo
+# We should be able to get the lock.
 crlock.sh foo || fail
 endTest
 
@@ -65,8 +68,10 @@ beginTest "crlock.sh --max-processes 2"
 rmlock.sh foo && crlock.sh foo
 crlock.sh --try 60 --max-processes 2 foo &
 crlock.sh --try 60 --max-processes 2 foo &
+# Give a little time for the .trying files to show up.
+sleep 5
 crlock.sh --try 60 --max-processes 2 foo 2> ${TMP}/tdd/stderr
-assertTrue $(grepFile ${TMP}/tdd/stderr "Too many processes are trying to aquire lock")
+assertTrue $(grepFile stderr "Too many processes are trying to aquire lock")
 endTest
 
 

@@ -7,7 +7,7 @@
 
 cd ${WAHOO}/tests
 
-test-config.sh
+test-install.sh
 test-has.sh
 test-debug.sh
 test-str.sh
@@ -19,7 +19,7 @@ test-wahoo-setup.sh
 test-wahoo-path.sh
 test-crlock.sh
 test-rmlock.sh
-test-wahoo-check-jobs.sh
+test-wahoo-check-events.sh
 test-mail.sh
 test-fire-event.sh
 test-route-message.sh

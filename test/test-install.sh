@@ -39,16 +39,16 @@ beginTest "\${DOMAIN_CONFIG_FILE} exists."
 assertTrue $([[ -f ${DOMAIN_CONFIG_FILE} ]] && echo 1 )
 endTest
 
-beginTest "\${WAHOO}/domains/\${WAHOO_DOMAIN}/bin exists."
-assertTrue $([[ -d ${WAHOO}/domains/${WAHOO_DOMAIN}/bin ]] && echo 1 )
+beginTest "\${WAHOO}/domain/\${WAHOO_DOMAIN}/bin exists."
+assertTrue $([[ -d ${WAHOO}/domain/${WAHOO_DOMAIN}/bin ]] && echo 1 )
 endTest
 
 beginTest "PATH includes \${WAHOO}/bin."
 assertTrue $(echo ${PATH} | egrep "${WAHOO}/bin" | wc -l)
 endTest
 
-beginTest "PATH includes \${WAHOO}/domains/\${WAHOO_DOMAIN}/bin"
-assertTrue $(echo ${PATH} | egrep "${WAHOO}/domains/${WAHOO_DOMAIN}/bin" | wc -l) 
+beginTest "PATH includes \${WAHOO}/domain/\${WAHOO_DOMAIN}/bin"
+assertTrue $(echo ${PATH} | egrep "${WAHOO}/domain/${WAHOO_DOMAIN}/bin" | wc -l) 
 endTest
 
 beginTest "Local copy of Korn Shell 93 is available."
@@ -69,5 +69,5 @@ assertTrue $(crontab -l | str.sh nocomment | grep run.sh | wc -l)
 endTest
 
 beginTest "events.cfg file exists"
-assertFile ${WAHOO}/domains/${WAHOO_DOMAIN}/events.cfg
+assertFile ${WAHOO}/domain/${WAHOO_DOMAIN}/events.cfg
 endTest

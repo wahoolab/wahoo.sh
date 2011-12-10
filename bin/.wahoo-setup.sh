@@ -36,9 +36,10 @@ cd ..
 
 TMP=$(pwd)/tmp
  
-[[ ! -d ${TMP} ]] && mkdir ${TMP}
-[[ ! -d domains ]] && mkdir domains
-[[ ! -d log ]] && mkdir log
+# Create required directories in ${WAHOO}.
+for d in tmp domain log task; do
+   [[ ! -d ${d} ]] && mkdir ${d}
+done
 
 # Check if we have a copy of ksh 93. 
 if [[ ! -f ${TMP}/$(hostname)/ksh ]]; then
@@ -75,16 +76,17 @@ else
    find ${TMP} -name ".wahoo.*" -mtime +30 -exec rm {} \;
 fi
 
+[[ -z ${WAHOO_ZIP_PROGRAM} ]] && WAHOO_ZIP_PROGRAM=$(first_file_found "/bin /usr /" "gzip compress")
 WAHOO_HOME=$(pwd)
 WAHOO=${WAHOO_HOME}
 OSTYPE=$(uname -s | ./bin/str.sh ucase)
 
 # Check if domain exists and create if it does not.
-if [[ ! -d ${WAHOO}/domains/${WAHOO_DOMAIN} ]]; then
-   mkdir -p ${WAHOO}/domains/${WAHOO_DOMAIN}/bin && chmod 700 ${WAHOO}/domains/${WAHOO_DOMAIN}/bin
+if [[ ! -d ${WAHOO}/domain/${WAHOO_DOMAIN} ]]; then
+   mkdir -p ${WAHOO}/domain/${WAHOO_DOMAIN}/bin && chmod 700 ${WAHOO}/domain/${WAHOO_DOMAIN}/bin
 fi
 
-DOMAIN_CONFIG_FILE=${WAHOO_HOME}/domains/${WAHOO_DOMAIN}/.wahoo
+DOMAIN_CONFIG_FILE=${WAHOO_HOME}/domain/${WAHOO_DOMAIN}/.wahoo
 LOCAL_CONFIG_FILE=~/.wahoo
 
 # Check if log directory exists and create if it does not.
@@ -92,9 +94,9 @@ LOCAL_CONFIG_FILE=~/.wahoo
 
 # Create an empty .wahoo config file in the domain directory. The settings in this file can over-ride the settings
 # in the ~/.wahoo config file.
-if [[ ! -f ${WAHOO}/domains/${WAHOO_DOMAIN}/.wahoo ]]; then
-   touch ${WAHOO}/domains/${WAHOO_DOMAIN}/.wahoo 
-   chmod 600  ${WAHOO}/domains/${WAHOO_DOMAIN}/.wahoo
+if [[ ! -f ${WAHOO}/domain/${WAHOO_DOMAIN}/.wahoo ]]; then
+   touch ${WAHOO}/domain/${WAHOO_DOMAIN}/.wahoo 
+   chmod 600  ${WAHOO}/domain/${WAHOO_DOMAIN}/.wahoo
 fi
 
 PATH=$(./bin/.wahoo-path.sh)
@@ -136,7 +138,7 @@ LOCAL_CONFIG_FILE=${LOCAL_CONFIG_FILE}
 DOMAIN_CONFIG_FILE=${DOMAIN_CONFIG_FILE}
 
 # 
-PATH=\${WAHOO}/domains/${WAHOO_DOMAIN}/bin:\${WAHOO}/bin:${PATH}
+PATH=\${WAHOO}/domain/${WAHOO_DOMAIN}/bin:\${WAHOO}/bin:${PATH}
 
 # Not a good idea to mess with this one, as you want to ensure consistent use of this in scripts.
 HOSTNAME=$(hostname)
@@ -173,6 +175,9 @@ LINE2=$(printf %80s|tr ' ' "=")
 # OPTIONAL
 # -----------------------------------------------------------------------------
 
+# This variable points to the file delivered Wahoo events file.
+WAHOO_EVENTS_FILE=\${WAHOO}/bin/.wahoo-events.cfg
+
 # Y is this is a production host, N or null if this host is not production. When scripting only test for Y.
 WAHOO_PROD=${WAHOO_PROD}
 
@@ -182,6 +187,9 @@ SIMPLE_HOSTNAME="${SIMPLE_HOSTNAME}"
 
 # Name of program to send email with, almost always mail or mailx.
 WAHOO_MAIL_PROGRAM=${WAHOO_MAIL_PROGRAM}
+
+# Program to be used for compressing files (usually gzip or compress).
+WAHOO_ZIP_PROGRAM=${WAHOO_ZIP_PROGRAM}
 
 # Default list of email addresses to be used when emails are sent.
 # WAHOO_EMAILS="admin@wahoolab.com,appgroup@acmeco.com"
@@ -213,49 +221,29 @@ WAHOO_TEST=
 # MAX_LOCK_SECONDS=129600
 MAX_LOCK_SECONDS=129600
 
+# -----------------------------------------------------------------------------
+# Plugins
+# -----------------------------------------------------------------------------
+
+# List of plugins to attempt to install. Use the appropriate directory name from \${WAHOO}/plugin.
+# WAHOO_PLUGINS="plugin, plugin"
+WAHOO_PLUGINS=
+
+$(${WAHOO}/bin/.wahoo-get-plugins-config.sh "oracle-os-watcher")
+
 # You can configure settings for the entire domain in this file. These settings will over-ride the settings
 # in ~/.wahoo.
-. \${WAHOO}/domains/\${WAHOO_DOMAIN}/.wahoo
+. \${WAHOO}/domain/\${WAHOO_DOMAIN}/.wahoo
 
 EOF
 ) > ~/.wahoo
 
 if [[ -f ${BACKUP_CONFIG_FILE} ]]; then
-   (
-   # Look through the new file.
-   cat ~/.wahoo | while read -r NEWLINE; do
-      # If the line is a parameter...
-      if $(echo "${NEWLINE}" | egrep "^[A-Z].*=" | egrep -v "^#|^WAHOO=|^WAHOO_HOME=" 1> /dev/null); then
-          # Get the line from the old file.
-          PARAMETER=$(echo ${NEWLINE} | awk -F"=" '{print $1}')
-          OLDLINE=$(grep "^${PARAMETER}=" ${BACKUP_CONFIG_FILE})
-          # If the lines do not match.
-          if [[ "${NEWLINE}" != "${OLDLINE}" ]]; then
-             NEWLINE="${OLDLINE}"
-          fi
-      fi
-      echo "${NEWLINE}"
-   done
-   ) > ~/.wahoo0
-   mv ~/.wahoo0 ~/.wahoo
+   ${WAHOO}/bin/.wahoo-merge-config-files.sh ${BACKUP_CONFIG_FILE} ~/.wahoo
 fi
 
-(
-cat <<EOF
-# Always automatically replace /tmp/wahoo if it has been removed for some reason.
-if [ ! -f /tmp/wahoo ]; then 
-   cp ${WAHOO_HOME}/tmp/$(hostname)/ksh /tmp/wahoo 
-   chmod 700 /tmp/wahoo
-fi
-
-# Attempt to load ~/.wahoo configuration file.
-[ -f .wahoo ] && \$(. .wahoo 2> /dev/null)
-[ -f ~/.wahoo ] && . ~/.wahoo
-
-${WAHOO}/bin/.wahoo-check-jobs.sh 1>> ${WAHOO}/log/stdout 2>> ${WAHOO}/log/stderr
-EOF
-) > ${WAHOO_HOME}/run.sh
-chmod 700 ${WAHOO_HOME}/run.sh
+# Create the run.sh program which is called from cron and runs everything.
+${WAHOO}/bin/.wahoo-create-run-sh.sh
 
 # Create the default events.cfg file in your domain directory if it does not exist.
 ${WAHOO}/bin/.wahoo-create-events-cfg.sh

@@ -4,10 +4,10 @@
 cd ${TMP}
 export WAHOO_TESTING="Y"
 
-nowTesting ".wahoo-check-jobs.sh"
+nowTesting ".wahoo-check-events.sh"
 
 beginTest "--help Option"
-assertTrue $(grep "\-\-help" ${WAHOO}/bin/.wahoo-check-jobs.sh | wc -l)
+assertTrue $(grep "\-\-help" ${WAHOO}/bin/.wahoo-check-events.sh | wc -l)
 endTest
 
 rm ${WAHOO}/log/stderr ${WAHOO}/log/stdout 2> /dev/null
@@ -47,17 +47,17 @@ cat <<EOF
       touch \${TMP}/tdd/failure
 
 EOF
-) > ${TMP}/.wahoo-jobs
+) > ${TMP}/.wahoo-events
 
-beginTest ".wahoo-check-jobs.sh"
-.wahoo-check-jobs.sh --file ${TMP}/.wahoo-jobs
+beginTest ".wahoo-check-events.sh"
+.wahoo-check-events.sh --file ${TMP}/.wahoo-events
 sleep 10
 assertTrue $(exist test1 test2 test3 test4)
 assertTrue $(grepFile "test2" "convert this string")
 endTest
 
 beginTest "Testing --event"
-.wahoo-check-jobs.sh --file ${TMP}/.wahoo-jobs --event TestEvent
+.wahoo-check-events.sh --file ${TMP}/.wahoo-events --event TestEvent
 sleep 10
 assertTrue $(exist test5 test6 test7)
 endTest
@@ -68,8 +68,20 @@ endTest
 
 # Test an invalid entry.
 beginTest "Testing invalid schedule."
-echo "@ ** * * * *" > ${TMP}/.wahoo-jobs
-.wahoo-check-jobs.sh --event TestEvent --file ${TMP}/.wahoo-jobs 2> ${TMP}/tdd/errors.log
+echo "@ ** * * * *" > ${TMP}/.wahoo-events
+.wahoo-check-events.sh --event TestEvent --file ${TMP}/.wahoo-events 2> ${TMP}/tdd/errors.log
 assertTrue $(exist errors.log)
 endTest
+
+nowTesting "fire-event.sh"
+
+beginTest "--help Option"
+assertTrue $(grep "\-\-help" ${WAHOO}/bin/fire-event.sh | wc -l)
+endTest
+
+beginTest "fire-event.sh TestEvent"
+fire-event.sh "TestEvent"
+endTest
+
+rm ${WAHOO}/log/stderr ${WAHOO}/log/stdout 2> /dev/null
 
