@@ -222,6 +222,16 @@ WAHOO_TEST=
 MAX_LOCK_SECONDS=129600
 
 # -----------------------------------------------------------------------------
+# Built In Monitors
+# -----------------------------------------------------------------------------
+
+# monitor_localhost_for_reboot.sh
+# Must be 'Y' (default) to enable this monitor.
+MONITOR_LOCALHOST_FOR_REBOOT_ENABLED=Y
+# Keyword used to route messages for this monitor.
+MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD="CRITICAL"
+
+# -----------------------------------------------------------------------------
 # Plugins
 # -----------------------------------------------------------------------------
 
@@ -247,6 +257,9 @@ ${WAHOO}/bin/.wahoo-create-run-sh.sh
 
 # Create the default events.cfg file in your domain directory if it does not exist.
 ${WAHOO}/bin/.wahoo-create-events-cfg.sh
+
+# Create tasks which are part of default install.
+${WAHOO}/bin/.wahoo-create-default-tasks.sh
 
 cat <<EOF
 $LINE1

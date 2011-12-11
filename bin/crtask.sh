@@ -46,6 +46,10 @@ Options:
      Quit running the task after [n] hours. If [n]=0 the
      command will only execute once.
 
+   --silent
+  
+     Do not report an error if the key already exists.
+
    --remove "[key]"
 
      Remove task using key.
@@ -63,6 +67,7 @@ QUIT_TASK_AFTER_MINUTES=
 TASK_SCOPE="$(hostname)"
 FORCE=
 TASK_HOST=
+SILENT=
 while (( $# > 0)); do
    case $1 in
       --key) shift; TASK_KEY="${1}" ;;
@@ -73,6 +78,7 @@ while (( $# > 0)); do
       --remove) shift; rm ${TASK_DIR}/${1} 2> /dev/null; exit 0 ;;
       --force) FORCE="FORCE" ;;
       --hostname) shift; TASK_HOST="${1}" ;;
+      --silent) SILENT="SILENT" ;;
       *) break ;;
    esac
    shift
@@ -92,7 +98,7 @@ fi
 if [[ ! -f ${TASK_FILE} || -n ${FORCE} ]]; then
    echo "${SCHEDULE}:$(time.sh epoch --minutes):${QUIT_TASK_AFTER_MINUTES}:${COMMAND}" > ${TASK_FILE} 
 else
-   error.sh "$0 - Task file for task key ${TASK_KEY} already exists!" && exit 1   
+   [[ -z "${SILENT}" ]] && error.sh "$0 - Task file for task key ${TASK_KEY} already exists!" && exit 1   
 fi
 
 exit 0

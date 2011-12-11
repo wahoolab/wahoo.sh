@@ -28,6 +28,10 @@ Options:
    --no-header
 
      Do not include a header in the sensor output.     
+
+   --clear [key]
+
+     Used to reset a sensor using the unique sensor key.
  
 EOF
 exit 0
@@ -42,12 +46,14 @@ ALLOWABLE_TRYS=0
 NOCHANGE=
 NOHEADER=
 COMMAND_LINE="$0 $*"
+CLEAR=
 while (( $# > 0)); do
    case $1 in
       --key) shift; SENSOR_KEY="${1}" ;;
       --try) shift; ALLOWABLE_TRYS="${1}" ;; 
       --no-change) NOCHANGE="NOCHANGE" ;;
       --no-header) NOHEADER="NOHEADER" ;;
+      --clear) CLEAR="CLEAR" ;;
       *) break ;;
    esac
    shift
@@ -58,6 +64,11 @@ SENSOR_DIR=${SENSOR_DIR}/${SENSOR_KEY}
 [[ ! -d ${SENSOR_DIR} ]] && mkdir ${SENSOR_DIR}
 
 cd ${SENSOR_DIR}
+
+if [[ -n "${CLEAR}" ]]; then
+   rm in-1 in-2 t d 2> /dev/null     
+   exit 0
+fi
 
 cp /dev/null in-1
 while read -r INPUT; do
