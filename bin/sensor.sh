@@ -3,7 +3,7 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-debug.sh "$0"
+debug.sh -2 "$0"
 
 function usage {
 cat <<EOF
@@ -63,13 +63,14 @@ done
 SENSOR_DIR=${SENSOR_DIR}/${SENSOR_KEY}
 [[ ! -d ${SENSOR_DIR} ]] && mkdir ${SENSOR_DIR}
 
-cd ${SENSOR_DIR}
+cd ${SENSOR_DIR} || error.sh "$0 - Count not change to directory ${SENSOR_DIR}."
 
 if [[ -n "${CLEAR}" ]]; then
    rm in-1 in-2 t d 2> /dev/null     
    exit 0
 fi
 
+# debug.sh -3 "$0 - pwd=$(pwd)"
 cp /dev/null in-1
 while read -r INPUT; do
    echo "${INPUT}" >> in-1
@@ -77,17 +78,16 @@ done
 
 function return_with_header {
 cat <<EOF
-The following sensor has been triggered.
+$(date) Sensor Triggered!
 
-   "${COMMAND_LINE}"
+"${COMMAND_LINE}"
 
 Differences detected shown below.
 ${LINE1}
 $(cat d)
-
 Most recent sensor input shown below.
 ${LINE1}
-$(cat in-2)
+$(cat in-1)
 EOF
 }
 
@@ -95,25 +95,33 @@ function return_without_header {
 $(cat d)
 }
 
+function trigger_sensor {
+( [[ -n ${NOHEADER} ]] && return_without_header || return_with_header ) | tee -a ${SENSOR_KEY}.log
+}
+
 if [[ ! -f in-2 ]]; then
    cp in-1 in-2
+   debug.sh -3 "$0 - in-2 does not exist"
 else
+   # cat in-1 | debug.sh -3
+   # cat in-2 | debug.sh -3
    diff in-2 in-1 > d
-   if [[ -z ${NOCHANGE} && -s d ]]; then
+   debug.sh -3 "NOCHANGE=${NOCHANGE}"
+   debug.sh -3 "$(ls -alrt d)"
+   if [[ -z ${NOCHANGE} && -s d ]] || [[ -n ${NOCHANGE} && ! -s d ]]; then
+      echo "$(date) Sensor Missed!" >> ${SENSOR_KEY}.log
       date >> t
+      debug.sh -3 "TRYS=$(cat t | wc -l) ALLOWABLE_TRYS=${ALLOWABLE_TRYS}"
       if (( $(cat t | wc -l) > ${ALLOWABLE_TRYS} )); then
-         [[ -n ${NOHEADER} ]] && return_without_header || return_with_header
+         trigger_sensor
          cp in-1 in-2
-      fi 
-   elif [[ -n ${NOCHANGE} && ! -s d ]]; then
-      date >> t
-      if (( $(cat t | wc -l) > ${ALLOWABLE_TRYS} )); then
-         [[ -n ${NOHEADER} ]] && return_without_header || return_with_header
-         cp in-1 in-2
+         debug.sh -2 "${COMMAND_LINE} (this sensor was triggered)"
       fi
    else
       cp /dev/null t
    fi
 fi
+
+rm in-1 2> /dev/null
 
 exit 0

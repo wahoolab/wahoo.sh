@@ -37,8 +37,8 @@ cd ..
 TMP=$(pwd)/tmp
  
 # Create required directories in ${WAHOO}.
-for d in tmp domain log task; do
-   [[ ! -d ${d} ]] && mkdir ${d}
+for d in tmp domain log task task/$(hostname); do
+   [[ ! -d ${d} ]] && mkdir -p ${d}
 done
 
 # Check if we have a copy of ksh 93. 
@@ -260,6 +260,9 @@ ${WAHOO}/bin/.wahoo-create-events-cfg.sh
 
 # Create tasks which are part of default install.
 ${WAHOO}/bin/.wahoo-create-default-tasks.sh
+
+# Create default event folders.
+${WAHOO}/bin/.wahoo-create-default-events.sh
 
 cat <<EOF
 $LINE1

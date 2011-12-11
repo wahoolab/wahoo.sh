@@ -70,6 +70,8 @@ AUDIT_LOG=
 NOLOG=
 DOCUMENT=
 SUBJECT=
+EVENT_NAME=
+FIRE_EVENT=
 while (( $# > 0)); do
    case $1 in
       --subject  ) shift; SUBJECT="${1}" ;;
@@ -81,6 +83,7 @@ while (( $# > 0)); do
       --emails   ) shift; WAHOO_EMAILS="${1}" ;;
       --pagers   ) shift; WAHOO_PAGERS="${1}" ;;
       --incident ) shift; INCIDENT="${1}" ;;
+      --fire     ) shift; FIRE_EVENT="${1}" ;;
       *) break ;;
    esac
    shift
@@ -128,6 +131,10 @@ while read -r INPUT; do
 done
 
 if [[ -s .message ]]; then
+
+   # If there is a message and --fire is defined, we need to fire the event.
+   [[ -n ${FIRE_EVENT} ]] && fire-event.sh --event "${FILE_EVENT}" 
+
    [[ -z ${SUBJECT} ]] && SUBJECT=$(cat .message | str.sh noblank | head -1) 
    echo ${SUBJECT} > .subject 
    header > .header 
