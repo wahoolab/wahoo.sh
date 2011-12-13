@@ -228,8 +228,8 @@ MAX_LOCK_SECONDS=129600
 # monitor_localhost_for_reboot.sh
 # Must be 'Y' (default) to enable this monitor.
 MONITOR_LOCALHOST_FOR_REBOOT_ENABLED=Y
-# Keyword used to route messages for this monitor.
-MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD="CRITICAL"
+# Keyword(s) used to route messages for this monitor. If more than one keyword separate with a comma.
+MONITOR_LOCALHOST_FOR_REBOOT_KEYWORDS="CRITICAL"
 
 # -----------------------------------------------------------------------------
 # Plugins

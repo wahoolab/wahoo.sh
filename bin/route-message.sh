@@ -16,45 +16,47 @@ Routes a message using the keywords provided.
 
 Options:
 
-  --keywords ["KEYWORD,KEYWORD"]
+  --keywords [one-or-more-keywords]
 
-    List of keywords to associate with this message. Keywords are used
-    to map the message to a particular action (such as log, email or
-    page). A keyword also triggers an event by the same name. 
+    List of keywords associated with this message. Keywords map the message 
+    to one or more actions. Separate multiple keywords with commas.
 
-  --emails ["email@foo.com,email@foo.com"]
+    PAGE      Send message to "\${WAHOO_PAGERS}" address list.
+    CRITICAL  Same as PAGE.
+    EMAIL     Send message to "\${WAHOO_EMAILS}" address list.
+    WARNING   Same as EMAIL.
+    INFO      Log the message in the \${WAHOO_MESSAGE_LOG}.
+    LOG       Same as INFO.
+    INCIDENT  This message triggers the opening of an incident ticket.
+    TRASH     Ignore this message and exit.
 
-    List of emails to send the message to. Typically messages
-    which are routed to email are sent to \${WAHOO_EMAILS} unless
-    this option is defined.  Note this does not mean the message will be 
-    sent to these addresses. The message is only sent if the message
-    triggers an email based upon the keywords provided.
+  --emails [one-or-more-emails]
 
-  --pagers ["email@foo.com,email@foo.com"]
+    Overrides the default email list (\${WAHOO_EMAILS}). Separate multiple
+    addresses with commas.
+
+  --pagers [one-or-more-emails]
    
-    Same as above with the exception that the email addresses should
-    trigger pages and the default addresses are defined by 
-    \${WAHOO_PAGERS}. Note this does not mean the message will be 
-    sent to these addresses. The message is only sent if the message
-    triggers a page based upon the keywords provided.
+    Overrides the default pager list (\${WAHOO_PAGERS}). Separate multiple
+    addresses with commas.
 
-  --nolog
+  --nolog [filename]
 
     Prevents message from being written to log files. 
 
-  --audit
+  --audit [filename]
 
-    Message is logged to the file defined by \${WAHOO_AUDIT_LOG}.
+    Message is logged to the file defined by \${WAHOO_AUDIT_LOG}. Note, the 
+    --nolog option does not prevent writing to the audit log.
 
   --log [filename]
 
     Message is logged to the file defined by [filename] instead
-    of the default log file defined by \${WAHOO_MESSAGE_LOG}.  
+    of the default log file (\${WAHOO_MESSAGE_LOG}).
 
-  --incident [id]
+  --incident [incident-id]
 
-    Id to identify an incident. This causes the message to get grouped 
-    into a single folder.
+    Unique ID used to open a new incident if one is not already open.
 
 EOF
 exit 0
@@ -62,8 +64,19 @@ exit 0
 
 [[ "${1}" == "--help" ]] && usage
 
+TMPFILE=${TMP}/$$.tmp
+trap 'rm ${TMPFILE} 2> /dev/null' 0
+
+while read -r INPUT; do
+   echo "${INPUT}" >> ${TMPFILE}
+done
+
+[[ ! -s ${TMPFILE} ]] && exit 0
+
 MESSAGE_FOLDER=${TMP}/messages/$(time.sh epoch)-$$
 mkdir -p ${MESSAGE_FOLDER}
+cd ${MESSAGE_FOLDER} || (error.sh "$0 - Message folder ${MESSAGE_FOLDER} not found!" && exit 1)
+mv ${TMPFILE} ${MESSAGE_FOLDER}/.message
 
 MESSAGE_DIRS=
 AUDIT_LOG=
@@ -90,8 +103,6 @@ while (( $# > 0)); do
 done
 (( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
 
-cd ${MESSAGE_FOLDER} || (error.sh "$0 - Message folder ${MESSAGE_FOLDER} not found!" && exit 1)
-
 if [[ -n ${MESSAGE_KEYWORDS} ]]; then
    .wahoo-keyword-override.sh "${MESSAGE_KEYWORDS}" | while read k; do
       case ${k} in
@@ -105,6 +116,11 @@ if [[ -n ${MESSAGE_KEYWORDS} ]]; then
          INFO|LOG)
             # Nothing to do here, logging is on by default for all keywords.
             WAHOO_MESSAGE_LOG=${WAHOO_MESSAGE_LOG}
+            ;;
+         INCIDENT)
+            if [[ -z ${INCIDENT} ]]; then
+               INCIDENT="$(time.sh ymd-hms)-$$"
+            fi
             ;;
          TRASH)
             return
@@ -126,30 +142,23 @@ ${LINE1}
 EOF
 }
 
-while read -r INPUT; do
-   echo "${INPUT}" >> .message
-done
+# If there is a message and --fire is defined, we need to fire the event.
+[[ -n ${FIRE_EVENT} ]] && fire-event.sh --event "${FILE_EVENT}" 
 
-if [[ -s .message ]]; then
-
-   # If there is a message and --fire is defined, we need to fire the event.
-   [[ -n ${FIRE_EVENT} ]] && fire-event.sh --event "${FILE_EVENT}" 
-
-   [[ -z ${SUBJECT} ]] && SUBJECT=$(cat .message | str.sh noblank | head -1) 
-   echo ${SUBJECT} > .subject 
-   header > .header 
-   for f in ${WAHOO_MESSAGE_LOG} ${MESSAGE_LOGS} ${AUDIT_LOG}; do
-      cat .header .message >> ${f} 
-      tdd.sh log "LOGFILE=${f}"
-   done 
-   if [[ -n ${DOCUMENT} ]]; then 
-      echo "${DOCUMENT}" > .document
-   fi
-   if [[ -n ${INCIDENT} ]]; then
-      echo "${INCIDENT}" > .incident 
-   fi
-   touch .send
+[[ -z ${SUBJECT} ]] && SUBJECT=$(cat .message | str.sh noblank | head -1) 
+echo ${SUBJECT} > .subject 
+header > .header 
+for f in ${WAHOO_MESSAGE_LOG} ${MESSAGE_LOGS} ${AUDIT_LOG}; do
+   cat .header .message >> ${f} 
+   tdd.sh log "LOGFILE=${f}"
+done 
+if [[ -n ${DOCUMENT} ]]; then 
+   echo "${DOCUMENT}" > .document
 fi
+if [[ -n ${INCIDENT} ]]; then
+   echo "${INCIDENT}" > .incident 
+fi
+touch .send
 
 if [[ ! -f .emails && ! -f .pagers && ! -f .document && ! -f .incident ]]; then
    cd ..; rm -rf ${MESSAGE_FOLDER}

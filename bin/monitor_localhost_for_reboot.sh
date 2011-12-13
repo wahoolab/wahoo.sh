@@ -24,10 +24,11 @@ Environment Variables:
 
      Current value is "${MONITOR_LOCALHOST_FOR_REBOOT_ENABLED}"
 
-   MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD
+   MONITOR_LOCALHOST_FOR_REBOOT_KEYWORDS
 
-     Keyword used to route messages for this monitor. If not 
-     defined, defaults to 'LOG'.
+     Keyword(s) used to route messages for this monitor. If not 
+     defined, defaults to 'LOG'. Separate multiple keywords with
+     a comma.
 
      Current value is "${MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD}"
 
@@ -45,10 +46,12 @@ fi
 
 MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD=${MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD:-"LOG"}
 
-debug.sh "$0 MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD=${MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD}"
+debug.sh "$(basename $0) MONITOR_LOCALHOST_FOR_REBOOT_KEYWORDS=${MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD}"
 
 # sort -u here since I have seen times when who -b may have returned duplicate lines.
 who -b | sort -u | sensor.sh --key "monitor_localhost_for_reboot" | \
-   route-message.sh --keywords "${MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD}" --subject "Reboot!" --fire "reboot"
+   route-message.sh --keywords "${MONITOR_LOCALHOST_FOR_REBOOT_KEYWORDS}" --subject "Reboot!" --fire "reboot"
+
+# ToDo: Need to add a script call here which keeps tracks of hours up/down.
 
 exit 0

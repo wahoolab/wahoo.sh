@@ -21,10 +21,6 @@ EOF
 
 chmod 700 ${TMPFILE}
 
-echo $LINE1
-cat ${TMPFILE}
-echo $LINE1
-
 ${TMPFILE} 1>> ${TMPFILE}.stdout 2>> ${TMPFILE}.stderr
 
 if [[ -s ${TMPFILE}.stderr ]]; then

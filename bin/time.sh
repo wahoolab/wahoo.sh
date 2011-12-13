@@ -40,5 +40,8 @@ case "${1}" in
    "y-m-d")
       date +"%Y-%m-%d"
       ;;
+    "ymd-hms")
+      date +"%Y%m%d-%H%M%S"
+      ;;
 esac
 

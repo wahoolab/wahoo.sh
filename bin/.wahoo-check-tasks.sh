@@ -3,7 +3,7 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-debug.sh "$0"
+debug.sh -2 "$0"
 
 function usage {
 cat <<EOF
@@ -35,13 +35,17 @@ for d in ${TASK_DIR} ${TASK_DIR}/$(hostname); do
       OIFS=${IFS}; IFS=":"
       head -1 ${f} | read SCHEDULE CREATE_TIME QUIT_TASK_AFTER_MINUTES COMMAND
       IFS=${OIFS} 
+      debug.sh -3 "$0 -- Checking schedule ${SCHEDULE}."
       if $(crontab.sh --schedule "${SCHEDULE}"); then
          if [[ -n ${QUIT_TASK_AFTER_MINUTES} ]]; then
             if (( $(time.sh epoch --minutes) > ((CREATE_TIME+QUIT_TASK_AFTER_MINUTES)) )); then
+               debug.sh -3 "Task has expired, removing it."
                rm ${f}
             else
                runscript.sh "${COMMAND}" &
             fi
+         else
+            runscript.sh "${COMMAND}" &
          fi
          if [[ -f ${TASK_DIR}/${TASK_KEY} ]]; then
             runscript.sh "${COMMAND}" &            
