@@ -46,7 +46,7 @@ fi
 
 MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD=${MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD:-"LOG"}
 
-debug.sh "$(basename $0) MONITOR_LOCALHOST_FOR_REBOOT_KEYWORDS=${MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD}"
+debug.sh "$$ $(basename $0) MONITOR_LOCALHOST_FOR_REBOOT_KEYWORDS=${MONITOR_LOCALHOST_FOR_REBOOT_KEYWORD}"
 
 # sort -u here since I have seen times when who -b may have returned duplicate lines.
 who -b | sort -u | sensor.sh --key "monitor_localhost_for_reboot" | \

@@ -4,8 +4,6 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-debug.sh -2 "$0"
-
 # pages and logs should get at least one time in log file so they are simple to see when sent.
 
 function usage {
@@ -73,6 +71,10 @@ done
 
 [[ ! -s ${TMPFILE} ]] && exit 0
 
+debug.sh -1 "$$ $(basename $0) $*"
+
+. ${WAHOO}/bin/.wahoo-functions.sh
+
 MESSAGE_FOLDER=${TMP}/messages/$(time.sh epoch)-$$
 mkdir -p ${MESSAGE_FOLDER}
 cd ${MESSAGE_FOLDER} || (error.sh "$0 - Message folder ${MESSAGE_FOLDER} not found!" && exit 1)
@@ -104,7 +106,8 @@ done
 (( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
 
 if [[ -n ${MESSAGE_KEYWORDS} ]]; then
-   .wahoo-keyword-override.sh "${MESSAGE_KEYWORDS}" | while read k; do
+   # This is from .wahoo-functions.sh
+   replace_keywords_using_overrides "${MESSAGE_KEYWORDS}" | while read k; do
       case ${k} in
          CRITICAL|PAGE)
             echo ${WAHOO_PAGERS} > .pagers

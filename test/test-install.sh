@@ -68,6 +68,3 @@ beginTest "Wahoo cronjob is scheduled."
 assertTrue $(crontab -l | str.sh nocomment | grep run.sh | wc -l)
 endTest
 
-beginTest "events.cfg file exists"
-assertFile ${WAHOO}/domain/${WAHOO_DOMAIN}/events.cfg
-endTest

@@ -7,6 +7,8 @@ export WAHOO_TESTING="Y"
 
 nowTesting "mail.sh"
 
+[[ -z ${WAHOO_EMAILS} ]] && WAHOO_EMAILS="spam@wahoolab.com"
+
 beginTest "--help Option"
 assertTrue $(grep "\-\-help" ${WAHOO}/bin/has.sh | wc -l)
 endTest

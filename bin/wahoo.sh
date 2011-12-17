@@ -82,6 +82,8 @@ exit 0
 
 [[ "${1}" == "--help" ]] && usage
 
+[[ -n ${WAHOO} ]] && . ${WAHOO}/bin/.wahoo-functions.sh
+
 function set_wahoo_parm {
    TEMPFILE=$$.temp
    PARAMETER="${1}"
@@ -144,7 +146,7 @@ case ${1} in
       echo ${WAHOO_VERSION} 
       ;;
    "tar") 
-      ${WAHOO}/bin/.wahoo-tarball
+      create_tarball_for_release
       ;;
    *) error.sh "$0 - Command ${1} is not recognized. Try \"wahoo.sh --help\"." && exit 1
       ;;

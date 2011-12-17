@@ -4,7 +4,7 @@
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
 # WAHOO_DEBUG_LEVEL=2
-debug.sh -2 "$0 $*"
+debug.sh -2 "$$ $(basename $0) $*"
 
 function usage {
 cat <<EOF
@@ -128,7 +128,9 @@ MATCH="MATCH"
 [[ ${MATCH} == "MATCH" && ${DAY_OF_WEEK} != "*" ]] && MATCH=$(check_for_match "${DAY_OF_WEEK}" $(date +"%w"))
 
 if [[ "${MATCH}" == "MATCH" ]]; then
+   debug.sh -3 "$$ true"
    exit 0
 else
+   debug.sh -3 "$$ false"
    exit 1 
 fi

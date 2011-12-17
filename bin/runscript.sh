@@ -4,9 +4,29 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
+debug.sh -1 "$$ $(basename $0) $*"
+
+# There are times when you will generate temporary scripts and you will 
+# want them removed when they are done running. In this case use the 
+# --remove option.
+REMOVE=
+while (( $# > 0)); do
+   case $1 in
+      --remove) REMOVE="Y" ;;
+      *) break ;;
+   esac
+   shift
+done
+(( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
+
+
 SCRIPT="${1}"
 TMPFILE="${TMP}/$$.tmp"
-# trap 'rm ${TMPFILE}* ${SCRIPT} 2> /dev/null' 0
+if [[ -n ${REMOVE} ]]; then
+   trap 'rm ${TMPFILE}* ${SCRIPT} 2> /dev/null' 0
+else
+   trap 'rm ${TMPFILE}* 2> /dev/null' 0
+fi
 
 (
 cat <<EOF

@@ -8,5 +8,5 @@ fi
 [ -f .wahoo ] && $(. .wahoo 2> /dev/null)
 [ -f ~/.wahoo ] && . ~/.wahoo
 
-/home/lab/Dropbox/wahoo/bin/.wahoo-check-tasks.sh
+/home/lab/Dropbox/wahoo/bin/.wahoo-check-events.sh
 

@@ -4,7 +4,7 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-debug.sh "$0 $*"
+debug.sh "$$ $(basename $0) $*"
 
 function usage {
 cat <<EOF
@@ -30,6 +30,10 @@ exit 0
 }
 
 [[ "${1}" == "--help" ]] && usage
+
+if ! $(which ${WAHOO_MAIL_PROGRAM} 1> /dev/null); then
+   error.sh "$0 - \${WAHOO_MAIL_PROGRAM} is either not defined or not found." && exit 1
+fi
 
 TMPFILE=${TMP}/$$.tmp
 trap 'rm ${TMPFILE}* 2> /dev/null' 0

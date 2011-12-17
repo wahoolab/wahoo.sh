@@ -3,7 +3,7 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-debug.sh -2 "$0"
+debug.sh -2 "$$ $(basename $0) $*"
 
 function usage {
 cat <<EOF
@@ -101,21 +101,21 @@ function trigger_sensor {
 
 if [[ ! -f in-2 ]]; then
    cp in-1 in-2
-   debug.sh -3 "$0 - in-2 does not exist"
+   debug.sh -3 "$$ in-2 does not exist"
 else
    # cat in-1 | debug.sh -3
    # cat in-2 | debug.sh -3
    diff in-2 in-1 > d
-   debug.sh -3 "NOCHANGE=${NOCHANGE}"
-   debug.sh -3 "$(ls -alrt d)"
+   debug.sh -3 "$$ NOCHANGE=${NOCHANGE}"
+   debug.sh -3 "$$ $(ls -alrt d)"
    if [[ -z ${NOCHANGE} && -s d ]] || [[ -n ${NOCHANGE} && ! -s d ]]; then
       echo "$(date) Sensor Missed!" >> ${SENSOR_KEY}.log
       date >> t
-      debug.sh -3 "TRYS=$(cat t | wc -l) ALLOWABLE_TRYS=${ALLOWABLE_TRYS}"
+      debug.sh -3 "$$ TRYS=$(cat t | wc -l) ALLOWABLE_TRYS=${ALLOWABLE_TRYS}"
       if (( $(cat t | wc -l) > ${ALLOWABLE_TRYS} )); then
          trigger_sensor
          cp in-1 in-2
-         debug.sh -2 "${COMMAND_LINE} (this sensor was triggered)"
+         debug.sh -2 "$$ ${COMMAND_LINE} (this sensor was triggered)"
       fi
    else
       cp /dev/null t
