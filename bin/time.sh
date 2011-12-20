@@ -28,9 +28,12 @@ exit 0
 
 [[ "${1}" == "--help" ]] && usage
 
+function epoch {
+echo $(perl -e 'printf "%d\n", time;')
+}
 case "${1}" in
    "epoch") 
-       EPOCH=$(perl -e 'printf "%d\n", time;')
+       EPOCH=$(epoch)
        case "${2}" in
          "--hours"  ) printf $(echo "${EPOCH} / 3600" | bc -l) | awk -F"." '{print $1}' ;;
          "--minutes") printf $(echo "${EPOCH} / 60" | bc -l) | awk -F"." '{print $1}'   ;;
@@ -40,8 +43,11 @@ case "${1}" in
    "y-m-d")
       date +"%Y-%m-%d"
       ;;
-    "ymd-hms")
+   "ymd-hms")
       date +"%Y%m%d-%H%M%S"
+      ;;
+   "tuple")
+      echo "$(epoch),$(date +'%Y,%m,%d,%H,%M,%S,%m/%d/%Y %H:%M')"
       ;;
 esac
 

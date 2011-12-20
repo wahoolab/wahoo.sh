@@ -5,6 +5,8 @@
 [[ -z ${WAHOO} ]] && echo "\${WAHOO} is not defined!" && exit 1
 [[ ! -f /tmp/wahoo ]] && echo "/tmp/wahoo not found!" && exit 1
 
+# ToDo: Check all f in bin check for test-${f}.sh.
+
 cd ${WAHOO}/test
 
 test-install.sh
