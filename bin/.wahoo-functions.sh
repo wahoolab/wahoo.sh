@@ -8,6 +8,12 @@ General functions used within Wahoo.
 
 Functions:
 
+   select_input_by_item_number
+
+      See .wahoo-setup for an example of how this function is used to 
+      prompt the user with a selection of options from which a 
+      selection can be made.
+
    replace_keywords_using_overrides [list-of-keywords]
       
       Takes a comma separated list of keywords and checks the 
@@ -28,6 +34,19 @@ exit 0
 }
 
 [[ "${1}" == "--help" ]] && functions_help
+
+function select_input_by_item_number {
+# ToDo: Support large numbers of items using >1 columns.
+index=0
+while read INPUT; do
+    ((index=index+1))
+    item[$index]="${INPUT}"
+    printf "%-3s %s\n" "${index}" "${item[$index]}"
+done
+
+printf "\n%s" "Select: "
+}
+
 
 function replace_keywords_using_overrides {
 # List of keywords seperated by commas.
@@ -59,7 +78,9 @@ rm -rf ${WAHOO}${YMD} 2> /dev/null
 cp -rp ${WAHOO} ${WAHOO}${YMD}
 cd ${WAHOO}${YMD}
 rm run.sh 2> /dev/null
-rm -rf domain tmp log event/* 2> /dev/null
+rm -rf domain tmp log event 2> /dev/null
+# Remove oracle-osw
+rm -rf ${WAHOO}/plugin/oracle-osw/*
 cd ${WAHOO}/.. 
 tar -cf ${WAHOO}${YMD}.tar wahoo${YMD}
 gzip ${WAHOO}${YMD}.tar

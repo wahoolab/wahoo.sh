@@ -20,23 +20,21 @@ WAHOO_DEBUG_LEVEL=0
 DECIMALS=2
 typeset -u ALLOW_NEGATIVE_VALUES CONVERSION_TYPE
 ALLOW_NEGATIVE_VALUES=N
+STATENGINE_LOG_FILE=${WAHOO}/log/statengine.log
 
 # ToDo: Might want to allow a seperate daemons to look in different work queues.
-STATENGINE_INBOX=${TMP}/statengine/
-[[ ! -d ${STATENGINE_INBOX} ]] && mkdir -p ${STATENGINE_INBOX}
-cd ${STATENGINE_INBOX} || exit 1
+DEFAULT_QUEUE=${TMP}/statengine/default_queue
+[[ ! -d ${DEFAULT_QUEUE} ]] && mkdir -p ${DEFAULT_QUEUE}
+cd ${DEFAULT_QUEUE} || exit 1
 
 function get_current_time {
-   # Very expensive call, limit these.
+   # Very expensive call, limit these!
    echo $(time.sh epoch)
 }
 
+
 function get_value_delta {
    ((VALUE-${last_unconverted_value[$KEY]}))
-   if (( ${VALUE} < 0 )) && [[ ${ALLOW_NEGATIVE_VALUES} != "Y" ]]; then
-      VALUE=0
-      # ToDo: May want to log some sort of warning here.
-   fi
    # ToDo: How much faster if we don't echo here and just allow VALUE to be set above?
    echo ${VALUE}
 }
@@ -129,6 +127,12 @@ while ((1)); do
          last_unconverted_value[$KEY]=${VALUE}
          # debug.sh -3 "xyz is ${last_unconverted_value[${KEY}]}"
          last_time[${KEY}]=${STAT_TIME}
+
+         if (( ${CONVERTED_VALUE} < 0 )) && [[ ${ALLOW_NEGATIVE_VALUES} != "Y" ]]; then
+            CONVERTED_VALUE=0
+            applog.sh "$(basename $0) - KEY=\"${KEY}\" returned negative value."
+         fi
+
          if [[ -n ${CONVERTED_VALUE} ]]; then
             # ToDo: Do we need to figure out how to use time tuple here?
             # Todo: How are we going to define the output file here?
@@ -141,7 +145,7 @@ while ((1)); do
       ((TOTAL_PROCESSING_TIME=TOTAL_PROCESSING_TIME+($(get_current_time)-PROCESSING_TIME)))
       ((TOTAL_DAEMON_RUN_TIME=$(get_current_time)-DAEMON_START_TIME))
       # Todo: This needs to go to the log file.
-      echo "TOTALS: STATS=${TOTAL_STAT_COUNT} PROCESSING_TIME=${TOTAL_PROCESSING_TIME} RUN_TIME=${TOTAL_DAEMON_RUN_TIME}"
+      [[ -n ${STATENGINE_LOG_FILE} ]] && echo "TOTALS: STATS=${TOTAL_STAT_COUNT} PROCESSING_TIME=${TOTAL_PROCESSING_TIME} RUN_TIME=${TOTAL_DAEMON_RUN_TIME}"
    done
    # Pause and wait a bit before check for new files.
    # ToDo: This needs to be an option and must be >= 1.

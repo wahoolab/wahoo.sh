@@ -6,6 +6,9 @@
 # Need to export all variables automatically.
 set -a
 
+TMPFILE=/tmp/$$.tmp
+trap 'rm ${TMPFILE} 2> /dev/null' 0
+
 touch ~/wahoo_setup.log && chmod 600 ~/wahoo_setup.log
 
 function setuplog {
@@ -60,6 +63,7 @@ fi
 
 # If this variable is not set then we have a new install and the ~/.wahoo file did not exist.
 if [[ -z ${WAHOO_HOME} || -z ${WAHOO} ]]; then
+   . ./bin/.wahoo-functions.sh   
    # There are things we do for a new install only.
    printf "Define the WAHOO_DOMAIN  > " && read WAHOO_DOMAIN
    [[ -z ${WAHOO_DOMAIN} ]] && exit 1
@@ -70,7 +74,12 @@ if [[ -z ${WAHOO_HOME} || -z ${WAHOO} ]]; then
    [[ -z ${SIMPLE_HOSTNAME} ]] && SIMPLE_HOSTNAME=$(hostname)
    # We will only set this for a new install, after this it could be that the user really wants it to be null.
    [[ -z ${MESSAGE_SUBJECT_PREFIX} ]] && MESSAGE_SUBJECT_PREFIX="[${WAHOO_DOMAIN}]"
-   [[ -z ${WAHOO_MAIL_PROGRAM} ]] && WAHOO_MAIL_PROGRAM=$(first_file_found "/bin /usr /" "mailx mail")
+   if [[ -z ${WAHOO_MAIL_PROGRAM} ]]; then
+      printf "\n%s\n\n" "Please select the program to use for sending mail."
+      (which mail; which mailx) | select_input_by_item_number
+      read SELECTION
+      WAHOO_MAIL_PROGRAM=${item[$SELECTION]}
+   fi       
    [[ ! -d tmp ]] && mkdir tmp
 else
    # Backup the current config file and keep a reference to the file name for use later.
