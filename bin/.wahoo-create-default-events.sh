@@ -1,13 +1,41 @@
 
-# Scheduled
-crevent.sh --key "5min"  --schedule "0,5,10,15,20,25,30,35,40,45,55 * * * *" 
-crevent.sh --key "10min" --schedule "0,10,20,30,40,50 * * * *"
-crevent.sh --key "60min" --schedule "0 * * * *"
+# Scheduled Events
+# ----------------
+crevent.sh --key "1min" --schedule "* * * * *" --silent
 
-crevent.sh --key "5min"  --command "monitor_localhost_for_reboot.sh" --silent
+FILE=${WAHOO}/event/1min/track-os-load.sh
+if [[ ! -f ${FILE} ]]; then
+   echo "echo \"OS_LOAD_AVG \$(get_os_load.sh)\" | statengine.sh --group OS --/min" > ${FILE}
+   chmod 700 ${FILE}
+fi
 
-# Starts and stops Oracle OS Watcher using config parameters.
-crevent.sh --key "10min" --command "oracle-ows.sh --check" --silent
+crevent.sh --key "5min" --schedule "0,5,10,15,20,25,30,35,40,45,55 * * * *"  --silent
 
-# Triggered
-crevent.sh --key "reboot"  
+FILE=${WAHOO}/event/5min/reboot_monitor.sh
+if [[ ! -f ${FILE} ]]; then
+   echo "monitor_localhost_for_reboot.sh" > ${FILE}
+   chmod 700 ${FILE}
+fi
+
+crevent.sh --key "10min" --schedule "0,10,20,30,40,50 * * * *" --silent
+
+FILE=${WAHOO}/event/10min/oracle-osw-check-daemon.sh
+if [[ ! -f ${FILE} ]]; then
+   echo "oracle-osw.sh --check-daemon" > ${FILE}
+   chmod 700 ${FILE}
+fi
+
+FILE=${WAHOO}/event/10min/statengine-check-daemon.sh
+if [[ ! -f ${FILE} ]]; then
+   echo "statengine.sh --check-daemon 1> /dev/null" > ${FILE}
+   chmod 700 ${FILE}
+fi
+
+crevent.sh --key "60min" --schedule "0 * * * *" --silent
+
+# Triggered Events
+# ----------------
+# The reboot event is triggered when monitor_localhost_for_reboot.sh detects a 
+# that the time returned by "who -b" changes.
+crevent.sh --key "reboot" --silent
+

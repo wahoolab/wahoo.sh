@@ -1,4 +1,5 @@
 #!/tmp/wahoo 
+
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
@@ -6,7 +7,7 @@ debug.sh -2 "$$ $(basename $0)"
 
 function usage {
 cat <<EOF
-usage: .wahoo-check-eventss.sh [options]
+usage: .wahoo-check-events.sh [options]
 
 Options:
 
@@ -16,10 +17,13 @@ EOF
 
 [[ "${1}" == "--help" ]] && usage
 
+# ToDo: Allow users to add and process their own event directories.
 EVENT_DIR=${WAHOO}/event
 
+FIRE=
 while (( $# > 0)); do
    case $1 in
+      --fire) shift; FIRE="${1}" ;;
       *) break ;;
    esac
    shift
@@ -27,34 +31,44 @@ done
 (( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
 
 function runscripts {
-   for x in $(ls * .run 2> /dev/null); do
-      [[ -f ${x} ]] || continue
-      debug.sh -3 "$$ f=${x}"
-      runscript.sh "${d}/${x}" &
+   # Run all executable scripts in the event directory.
+   for script in $(ls * .command* 2> /dev/null); do
+      [[ -x ${script} ]] || continue
+      runscript.sh "${d}/${script}" &
    done
 }
 
-function check_events {
-[[ ! -d ${1} ]] && mkdir ${1}
-debug.sh -3 "$$ FLAG_FILE=${FLAG_FILE}"
-find ${1} -type f -name "${FLAG_FILE}" | while read f; do
-   d=$(dirname ${f})
-   cd ${d} || exit 1
-   debug.sh -3 "$$ cd ${d}"
-   [[ -f .schedule ]] || continue
-   OIFS=${IFS}; IFS=":" 
-   cat .schedule | egrep -v "^#" | head -1 | read SCHEDULE CREATE_TIME QUIT_EVENT_AFTER_MINUTES
-   IFS=${OIFS}
-   [[ -n "${SCHEDULE}" ]] || continue
-   $(crontab.sh --schedule "${SCHEDULE}") || continue
-   runscripts
-done
+function handle_d {
+   cd ${1} || exit 1
+   debug.sh -3 "$$ cd ${1}"
+   RUN=Y
+   if [[ -s .allow ]]; then
+      $(grep $(hostname) .allow 1> /dev/null) || RUN=
+   elif [[ -s .deny ]]; then
+      $(grep $(hostname) .deny  1> /dev/null) && RUN=
+   fi
+   if [[ ${RUN} == "Y" ]]; then
+      if [[ ${2} == "schedule" ]]; then
+         SCHEDULE=$(cat .schedule | egrep -v "^#")
+         if [[ -n "${SCHEDULE}" ]]; then
+            $(crontab.sh --schedule "${SCHEDULE}") || RUN=
+         fi
+      fi
+      [[ ${RUN} == "Y" ]] && runscripts
+   fi
 }
 
-# .domain flag file prevents events tied to a particular host from running.
-FLAG_FILE=".domain"
-check_events ${EVENT_DIR}
-FLAG_FILE=".localhost"
-check_events ${EVENT_DIR}/$(hostname)
+if [[ -z ${FIRE} ]]; then
+   # Only looking at events with schedules.
+   find ${EVENT_DIR} -type f -size +0 -name ".schedule" | while read f; do
+      d=$(dirname ${f})
+      handle_d ${d} "schedule"
+   done
+else
+   debug.sh -3 "$$ Looking for event directories in ${l}"
+   find ${EVENT_DIR} -type d -name "${FIRE}" | while read d; do
+      handle_d ${d} "event"
+   done
+fi
 
 exit 0

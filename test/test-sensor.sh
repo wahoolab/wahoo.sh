@@ -1,11 +1,10 @@
 
+# Standard test file header.
 . ${WAHOO}/test/functions.sh
-
 cd ${TMP}
 export WAHOO_TESTING="Y"
-
-nowTesting "sensor.sh"
-
+nowTesting ${WAHOO}/bin/sensor.sh
 beginTest "--help Option"
-assertTrue $(grep "\-\-help" ${WAHOO}/bin/sensor.sh | wc -l)
+assertHelp
 endTest
+

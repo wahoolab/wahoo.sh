@@ -24,12 +24,11 @@ function WriteApp {
    echo "${1}" >> ${WAHOO_APP_LOG} 
 }
 
+D="$(date)"
 if [[ -z "${1}" ]]; then
-   WriteApp "$(date) WRITING INPUT FROM STANDARD IN"
-   while read INPUT; do
-      WriteApp "${INPUT}"
+   while read -r INPUT; do
+      WriteApp "${D} ${INPUT}"
    done
-   WriteApp "$(date) DONE"
 else
-   WriteApp "$(date) ${1}"
+   WriteApp "${D} ${1}"
 fi

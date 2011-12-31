@@ -4,7 +4,7 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-debug.sh -1 "$$ $(basename $0) $*"
+debug.sh -2 "$$ $(basename $0) $(basename ${1})"
 
 # There are times when you will generate temporary scripts and you will 
 # want them removed when they are done running. In this case use the 
@@ -18,7 +18,6 @@ while (( $# > 0)); do
    shift
 done
 (( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
-
 
 SCRIPT="${1}"
 TMPFILE="${TMP}/$$.tmp"

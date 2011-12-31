@@ -8,6 +8,10 @@ General functions used within Wahoo.
 
 Functions:
 
+   get_os_load_average
+
+      Return the current 5 minute load average.
+
    select_input_by_item_number
 
       See .wahoo-setup for an example of how this function is used to 
@@ -29,11 +33,19 @@ Functions:
       ToDo: Need a function to create a tarball that includes domain
       and host files for deployment to other servers.
    
+   create_run_file
+
+      Used during setup to create the run.sh file in \${WAHOO}.
+
 EOF
 exit 0
 }
 
 [[ "${1}" == "--help" ]] && functions_help
+
+function get_os_load_average {
+   uptime | awk '{ print substr($(NF-2),1,4) }'
+}   
 
 function select_input_by_item_number {
 # ToDo: Support large numbers of items using >1 columns.
@@ -89,6 +101,9 @@ ls ${WAHOO}${YMD}.tar.gz
 }
 
 function create_run_file {
+
+# NOTE: This file must be bash compliant so that it works from cron!
+
 [[ -z ${WAHOO} ]] && return
 (
 cat <<EOF

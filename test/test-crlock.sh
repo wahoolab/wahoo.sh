@@ -1,13 +1,11 @@
 
+# Standard test file header.
 . ${WAHOO}/test/functions.sh
-
 cd ${TMP}
 export WAHOO_TESTING="Y"
-
-nowTesting "crlock.sh"
-
+nowTesting ${WAHOO}/bin/crlock.sh
 beginTest "--help Option"
-assertTrue $(grep "\-\-help" ${WAHOO}/bin/crlock.sh | wc -l)
+assertHelp
 endTest
 
 beginTest "crlock.sh foo"
@@ -60,8 +58,8 @@ rmlock.sh foo && crlock.sh foo
 $(crlock.sh --fail 3 foo) && fail
 $(crlock.sh --fail 3 foo) && fail
 $(crlock.sh --fail 3 foo) && fail
-crlock.sh --fail 3 foo 2> ${TMP}/tdd/stderr
-assertTrue $(grepFile stderr "Failure limit has been reached trying to aquire lock foo") 
+crlock.sh --fail 3 foo 2> ${TEST_FILE}
+assertOne $(grepMatch ${TEST_FILE} "Failure limit has been reached trying to aquire lock foo") 
 endTest
 
 beginTest "crlock.sh --max-processes 2"
@@ -70,8 +68,8 @@ crlock.sh --try 60 --max-processes 2 foo &
 crlock.sh --try 60 --max-processes 2 foo &
 # Give a little time for the .trying files to show up.
 sleep 5
-crlock.sh --try 60 --max-processes 2 foo 2> ${TMP}/tdd/stderr
-assertTrue $(grepFile stderr "Too many processes are trying to aquire lock")
+crlock.sh --try 60 --max-processes 2 foo 2> ${TEST_FILE}
+assertOne $(grepMatch ${TEST_FILE} "Too many processes are trying to aquire lock")
 endTest
 
 

@@ -1,28 +1,26 @@
 
+# Standard test file header.
 . ${WAHOO}/test/functions.sh
-
 cd ${TMP}
 export WAHOO_TESTING="Y"
-
-nowTesting "debug.sh"
-
+nowTesting ${WAHOO}/bin/debug.sh
 beginTest "--help Option"
-assertTrue $(grep "\-\-help" ${WAHOO}/bin/debug.sh | wc -l)
+assertHelp
 endTest
 
 beginTest "Writing to default debug.log file"
 WAHOO_DEBUG_LEVEL=3
 DEBUG_STRING="x$(date)x" && sleep 1
 debug.sh "${DEBUG_STRING}"
-assertTrue $(grep "${DEBUG_STRING}" ${WAHOO_DEBUG_LOG} | wc -l)
+assertOne $(grepMatch ${WAHOO_DEBUG_LOG} "${DEBUG_STRING}")
 endTest
 
-WAHOO_DEBUG_LOG=${TMP}/tdd/debug.log
+WAHOO_DEBUG_LOG=${TEST_FILE}
 
 beginTest "Writing to non-default debug.log file"
 DEBUG_STRING="x$(date)x" && sleep 1
 debug.sh "${DEBUG_STRING}"
-assertTrue $(grep "${DEBUG_STRING}" ${WAHOO_DEBUG_LOG} | wc -l)
+assertOne $(grepMatch ${WAHOO_DEBUG_LOG} "${DEBUG_STRING}")
 endTest
 
 for l in 0 1 2 3; do 
@@ -33,11 +31,11 @@ for l in 0 1 2 3; do
       DEBUG_STRING="x$(date)x" && sleep 1
       debug.sh -${i} "${DEBUG_STRING}"
       if (( ${WAHOO_DEBUG_LEVEL} > 0 && ${i} <= ${WAHOO_DEBUG_LEVEL} )); then      
-         assertTrue $(grepFile "debug.log" "${DEBUG_STRING}") 
+         assertOne $(grepMatch ${TEST_FILE} "${DEBUG_STRING}")
       elif (( ${WAHOO_DEBUG_LEVEL} > 0 && ${i} > ${WAHOO_DEBUG_LEVEL})); then
-         assertFalse $(grepFile "debug.log" "${DEBUG_STRING}")
+         assertZero $(grepMatch ${TEST_FILE} "${DEBUG_STRING}")
       else 
-         assertFalse $(grepFile "debug.log" "${DEBUG_STRING}")
+         assertZero $(grepMatch ${TEST_FILE} "${DEBUG_STRING}")
       fi
       endTest
    done

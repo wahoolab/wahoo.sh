@@ -1,15 +1,14 @@
 
+# Standard test file header.
 . ${WAHOO}/test/functions.sh
-
 cd ${TMP}
 export WAHOO_TESTING="Y"
-KEYWORD_OVERRIDES=
-
-nowTesting "route-message.sh"
-
+nowTesting ${WAHOO}/bin/route-message.sh
 beginTest "--help Option"
-assertTrue $(grep "\-\-help" ${WAHOO}/bin/route-message.sh | wc -l)
+assertHelp
 endTest
+
+KEYWORD_OVERRIDES=
 
 beginTest "Testing no input (cat /dev/null)"
 cat /dev/null | route-message.sh

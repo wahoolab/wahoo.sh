@@ -21,6 +21,8 @@ exit 0
 
 function WriteError {
    echo "${1}" 3>&1 1>&2 2>&3
+   debug.sh "$$ error.sh ${1}"
+   applog.sh "error.sh ${1}"
 }
 
 if [[ -n "${1}" ]]; then

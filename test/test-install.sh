@@ -1,10 +1,12 @@
 
+# Standard test file header.
 . ${WAHOO}/test/functions.sh
-
 cd ${TMP}
 export WAHOO_TESTING="Y"
-
-nowTesting "This Installation"
+nowTesting ${WAHOO}/bin/.wahoo-setup.sh
+beginTest "--help Option"
+assertHelp
+endTest
 
 # Verify variable have values when required.
 (
@@ -44,11 +46,11 @@ assertTrue $([[ -d ${WAHOO}/domain/${WAHOO_DOMAIN}/bin ]] && echo 1 )
 endTest
 
 beginTest "PATH includes \${WAHOO}/bin."
-assertTrue $(echo ${PATH} | egrep "${WAHOO}/bin" | wc -l)
+assertTrue $(echo ${PATH} | egrep -c "${WAHOO}/bin")
 endTest
 
 beginTest "PATH includes \${WAHOO}/domain/\${WAHOO_DOMAIN}/bin"
-assertTrue $(echo ${PATH} | egrep "${WAHOO}/domain/${WAHOO_DOMAIN}/bin" | wc -l) 
+assertTrue $(echo ${PATH} | egrep -c "${WAHOO}/domain/${WAHOO_DOMAIN}/bin") 
 endTest
 
 beginTest "Local copy of Korn Shell 93 is available."
@@ -65,6 +67,6 @@ assertTrue $(set | grep "SECONDS" | str.sh split "." | wc -l)
 endTest
 
 beginTest "Wahoo cronjob is scheduled."
-assertTrue $(crontab -l | str.sh nocomment | grep run.sh | wc -l)
+assertTrue $(crontab -l | str.sh nocomment | grep -c run.sh)
 endTest
 

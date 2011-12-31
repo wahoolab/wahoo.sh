@@ -7,6 +7,19 @@
 
 # ToDo: Check all f in bin check for test-${f}.sh.
 
+cat <<EOF
+
+The following files may be missing tests.
+-----------------------------------------
+$(
+cd ${WAHOO}/bin
+ls * | while read f; do
+   [[ ! -f ${WAHOO}/test/test-${f} ]] && echo ${f}
+done
+)
+
+EOF
+
 cd ${WAHOO}/test
 
 test-install.sh

@@ -108,10 +108,10 @@ function in_list {
 
 function check_for_match {
 # If $1 contains a "-" then we have a range.
-if (( $(echo ${1} | grep "-" | wc -l) )); then
+if (( $(echo ${1} | grep -c "-" ) )); then
    MATCH=$(within_range ${1} ${2})
 # If #1 contains a "," we have a list.
-elif (( $(echo ${1} | grep "," | wc -l) )); then
+elif (( $(echo ${1} | grep -c ",") )); then
    MATCH=$(in_list ${1} ${2})
 # Else we have a single number to match on.
 else

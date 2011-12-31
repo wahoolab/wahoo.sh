@@ -1,26 +1,24 @@
 
+# Standard test file header.
 . ${WAHOO}/test/functions.sh
-
 cd ${TMP}
 export WAHOO_TESTING="Y"
-
-nowTesting "cache.sh"
-
+nowTesting ${WAHOO}/bin/cache.sh
 beginTest "--help Option"
-assertTrue $(grep "\-\-help" ${WAHOO}/bin/cache.sh | wc -l)
+assertHelp
 endTest
 
 beginTest "cache.sh set foo bar"
 KEY=$(time.sh epoch)
 assertUndefined $(cache.sh get ${KEY})
 cache.sh set ${KEY} "bar"
-assertTrue $([[ $(cache.sh get ${KEY}) == "bar" ]] && echo 1)
+assertEquals $(cache.sh get ${KEY})  "bar"
 endTest
 
 beginTest "cat file | cache.sh set \"foo\""
-set > ${TMP}/tdd/file1
-cat ${TMP}/tdd/file1 | cache.sh set "foo"
-cache.sh get "foo" > ${TMP}/tdd/file2
-assertFalse $(diff ${TMP}/tdd/file1 ${TMP}/tdd/file2 | wc -l)
+set > ${TEST_FILE}1
+cat ${TEST_FILE}1 | cache.sh set "foo"
+cache.sh get "foo" > ${TEST_FILE}2
+assertSame ${TEST_FILE}1 ${TEST_FILE}2
 endTest
 

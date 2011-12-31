@@ -1,17 +1,14 @@
 
-
+# Standard test file header.
 . ${WAHOO}/test/functions.sh
-
 cd ${TMP}
 export WAHOO_TESTING="Y"
-
-nowTesting "mail.sh"
+nowTesting ${WAHOO}/bin/mail.sh
+beginTest "--help Option"
+assertHelp
+endTest
 
 [[ -z ${WAHOO_EMAILS} ]] && WAHOO_EMAILS="spam@wahoolab.com"
-
-beginTest "--help Option"
-assertTrue $(grep "\-\-help" ${WAHOO}/bin/has.sh | wc -l)
-endTest
 
 beginTest "echo foo | mail.sh Test ${WAHOO_EMAILS}"
 echo foo | mail.sh "Test" "${WAHOO_EMAILS}"

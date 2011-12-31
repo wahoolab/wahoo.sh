@@ -1,13 +1,11 @@
 
+# Standard test file header.
 . ${WAHOO}/test/functions.sh
-
 cd ${TMP}
 export WAHOO_TESTING="Y"
-
-nowTesting "rmlock.sh"
-
+nowTesting ${WAHOO}/bin/rmlock.sh
 beginTest "--help Option"
-assertTrue $(grep "\-\-help" ${WAHOO}/bin/rmlock.sh | wc -l)
+assertHelp
 endTest
 
 beginTest "rmlock.sh"

@@ -20,7 +20,12 @@ Options:
       
    "y-m-d"
 
-     Return date in format YYYY-MM-DD.
+       Return date in format YYYY-MM-DD.
+
+    "ymd-hms"
+
+       Return date in format YYYYMMDD-HHMISS.
+
 
 EOF
 exit 0

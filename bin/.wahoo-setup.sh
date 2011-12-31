@@ -64,14 +64,34 @@ fi
 # If this variable is not set then we have a new install and the ~/.wahoo file did not exist.
 if [[ -z ${WAHOO_HOME} || -z ${WAHOO} ]]; then
    . ./bin/.wahoo-functions.sh   
-   # There are things we do for a new install only.
-   printf "Define the WAHOO_DOMAIN  > " && read WAHOO_DOMAIN
-   [[ -z ${WAHOO_DOMAIN} ]] && exit 1
+ 
    typeset -u WAHOO_PROD
-   printf "Is this a production host (Y or N) [N] > " && read WAHOO_PROD
-   [[ -z ${WAHOO_PROD} ]] && WAHOO_PROD="N"
-   printf "Define the SIMPLE_HOSTNAME > " && read SIMPLE_HOSTNAME
-   [[ -z ${SIMPLE_HOSTNAME} ]] && SIMPLE_HOSTNAME=$(hostname)
+
+   while (( $# > 0)); do
+      case $1 in
+         --domain) shift; WAHOO_DOMAIN="${1}"    ;;
+         --prod)   shift; WAHOO_PROD="${1}"      ;;
+         --name)   shift; SIMPLE_HOSTNAME="${1}" ;;
+         *)        break                          ;;
+      esac
+      shift
+   done
+
+   if [[ -z ${WAHOO_DOMAIN} ]]; then
+      printf "Define the WAHOO_DOMAIN  > " && read WAHOO_DOMAIN
+      [[ -n ${WAHOO_DOMAIN} ]] || exit 1
+   fi
+
+   if [[ -z ${WAHOO_PROD} ]]; then
+       printf "Is this a production host (Y or N) [N] > " && read WAHOO_PROD
+       [[ -n ${WAHOO_PROD} ]] || WAHOO_PROD="N"
+   fi
+
+   if [[ -z ${SIMPLE_HOSTNAME} ]]; then
+      printf "Define the SIMPLE_HOSTNAME > " && read SIMPLE_HOSTNAME
+      [[ -n ${SIMPLE_HOSTNAME} ]] || SIMPLE_HOSTNAME=$(hostname)
+   fi
+
    # We will only set this for a new install, after this it could be that the user really wants it to be null.
    [[ -z ${MESSAGE_SUBJECT_PREFIX} ]] && MESSAGE_SUBJECT_PREFIX="[${WAHOO_DOMAIN}]"
    if [[ -z ${WAHOO_MAIL_PROGRAM} ]]; then

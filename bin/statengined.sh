@@ -21,6 +21,18 @@ DECIMALS=2
 typeset -u ALLOW_NEGATIVE_VALUES CONVERSION_TYPE
 ALLOW_NEGATIVE_VALUES=N
 STATENGINE_LOG_FILE=${WAHOO}/log/statengine.log
+SLEEP_INTERVAL=60
+while (( $# > 0)); do
+   case $1 in
+      --sleep-interval) shift; SLEEP_INTERVAL="${1}" ;;
+      *) break ;;
+   esac
+   shift
+done
+(( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
+
+# Sleep interval must be at least 1 second.
+(( ${SLEEP_INTERVAL} <= 0 )) && SLEEP_INTERVAL=1
 
 # ToDo: Might want to allow a seperate daemons to look in different work queues.
 DEFAULT_QUEUE=${TMP}/statengine/default_queue
@@ -31,7 +43,6 @@ function get_current_time {
    # Very expensive call, limit these!
    echo $(time.sh epoch)
 }
-
 
 function get_value_delta {
    ((VALUE-${last_unconverted_value[$KEY]}))
@@ -55,10 +66,11 @@ DAEMON_START_TIME=$(get_current_time)
 # Keep track of total # of stats processed since start time.
 TOTAL_STAT_COUNT=0
 
+applog.sh "$(basename $0) - Starting statengined"
+
 # Main outer loop, keep looping until the program is killed.
 while ((1)); do
 
-   # Looking for files in inbox.
    ls | while read f; do
 
       # Do not process a file unless a "." dot file also exists. This file is written last and you can be sure that
@@ -145,11 +157,14 @@ while ((1)); do
       ((TOTAL_PROCESSING_TIME=TOTAL_PROCESSING_TIME+($(get_current_time)-PROCESSING_TIME)))
       ((TOTAL_DAEMON_RUN_TIME=$(get_current_time)-DAEMON_START_TIME))
       # Todo: This needs to go to the log file.
-      [[ -n ${STATENGINE_LOG_FILE} ]] && echo "TOTALS: STATS=${TOTAL_STAT_COUNT} PROCESSING_TIME=${TOTAL_PROCESSING_TIME} RUN_TIME=${TOTAL_DAEMON_RUN_TIME}"
+      if [[ -n ${STATENGINE_LOG_FILE} ]]; then
+         echo "TOTALS: STATS=${TOTAL_STAT_COUNT} PROCESSING_TIME=${TOTAL_PROCESSING_TIME} RUN_TIME=${TOTAL_DAEMON_RUN_TIME}" >> ${STATENGINE_LOG_FILE}
+      fi
    done
    # Pause and wait a bit before check for new files.
    # ToDo: This needs to be an option and must be >= 1.
-   sleep 5
+   sleep ${SLEEP_INTERVAL}
+   debug.sh -3 "$(basename $0) - Checking for stats to process"
 done
 
 exit 0

@@ -1,0 +1,62 @@
+Can this script trigger events?
+-------------------------------
+No. The purpose of this script is limited to the following.
+
+   1) Starting and stopping the statengined.sh daemon.
+   2) Minor validation and staging of data for statengined.sh
+
+Does this script provide outputs for reporting?
+-----------------------------------------------
+No.
+
+What outputs does the script provide?
+-------------------------------------
+This script does not provide any outputs. However, you can direct the
+output file for statengined.sh by using the --output-file option.
+
+Will this script provide an API for dumps?
+------------------------------------------
+There will need to be a way to trigger the daemon to dump all of the 
+current data. Will need to think about this feature once I start to
+enhance the daemon. The API will need to perhaps ask for a dump level
+and also a location for the dump files (there should be a default
+location of course and a default dump level.
+
+Will this script provide an API for status or dashboards?
+---------------------------------------------------------
+Yes. This script should provide a way to determine if the daemon is
+running or not. Perhaps it should return the number of hours, minutes
+or days that it has been running. Some sort of general log file should
+also be available which returns some detail about how long it is
+taking to process stats and such.
+
+Will this script write to the application log file?
+---------------------------------------------------
+Yes. Start and stops are logged to the app log, but need to confirm.
+
+   NOTE: All configuration changes need to be logged to the app log.
+   For example, if STATENGINE is changed from 0 to 60, this should 
+   be detected and automatically logged in the app log. This feature
+   needs to be implemented.
+
+Will this script write to the debug log file?
+---------------------------------------------
+Debug Level
+   1 - Don't think we need anything here, although anything that hits
+       the app log might ought to be a level 1 debug.
+   2 - Not yet but maybe. Perhaps cat the input file if debug 2 
+       is set. Might need to add a debug_level function.
+
+Does this script write to any other logs?
+-----------------------------------------
+No, but the statengined.sh script will write to statengined.log.
+
+Will the daemon be stopped when wahoo.sh --stop is called?
+----------------------------------------------------------
+Yes it should, but I need to check on this.
+
+Is there a maximum # of data points which can be passed to this script?
+-----------------------------------------------------------------------
+Not yet, but there should be some sort of threshold to limit some sort
+of runaway process.
+

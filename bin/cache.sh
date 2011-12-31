@@ -34,9 +34,11 @@ case "${1}" in
    "set")
       if [[ -z ${VALUE} ]]; then
          cp /dev/null ${CACHE}/${KEY}
-         while read INPUT; do
+         OIFS=${IFS}; IFS=
+         while read -r INPUT; do
             echo "${INPUT}" >> ${CACHE}/${KEY}
          done
+         IFS=${OIFS}
       else
          echo "${VALUE}" > ${CACHE}/${KEY} 
       fi

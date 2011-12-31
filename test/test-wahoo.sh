@@ -1,13 +1,11 @@
 
+# Standard test file header.
 . ${WAHOO}/test/functions.sh
-
 cd ${TMP}
 export WAHOO_TESTING="Y"
-
-nowTesting "wahoo.sh"
-
+nowTesting ${WAHOO}/bin/wahoo.sh
 beginTest "--help Option"
-assertTrue $(grep "\-\-help" ${WAHOO}/bin/wahoo.sh | wc -l)
+assertHelp
 endTest
 
 beginTest "wahoo.sh version"
@@ -17,7 +15,7 @@ endTest
 beginTest "wahoo.sh log"
 PATTERN="x $(date) x"
 wahoo.sh log "${PATTERN}"
-assertTrue $(grep "${PATTERN}" ${WAHOO_APP_LOG} | wc -l)
+assertTrue $(grep -c "${PATTERN}" ${WAHOO_APP_LOG})
 endTest
 
 beginTest "wahoo.sh config WAHOO_TEST \"\""
