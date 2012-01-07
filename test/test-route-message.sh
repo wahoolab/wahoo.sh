@@ -8,155 +8,157 @@ beginTest "--help Option"
 assertHelp
 endTest
 
-KEYWORD_OVERRIDES=
+export KEYWORD_OVERRIDES=
+export MESSAGE_FOLDER="${TEST_DIR}"
+export WAHOO_MESSAGE_LOG="${TEST_LOG}"
+export WAHOO_AUDIT_LOG="${TEST_FILE}"
 
 beginTest "Testing no input (cat /dev/null)"
 cat /dev/null | route-message.sh
-assertFalse $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+assertMissing .emails .header .subject .message .send .pagers .incident .document
 endTest
 
 beginTest "Testing without any options (same as --keywords LOG)"
-echo foo | route-message.sh 
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
+echo "cake" | route-message.sh 
+assertMissing .emails .header .subject .message .send .pagers .incident .document
+assertMatch ${TEST_LOG} "cake"
 endTest
 
 beginTest "Testing --keywords INFO"
-echo foo | route-message.sh --keywords INFO
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+echo "rice" | route-message.sh --keywords INFO
+assertMissing .emails .header .subject .message .send .pagers .incident .document
+assertMatch ${TEST_LOG} "rice"
 endTest
 
 beginTest "Testing --keywords LOG"
-echo foo | route-message.sh --keywords LOG
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+echo "gator" | route-message.sh --keywords INFO
+assertMissing .emails .header .subject .message .send .pagers .incident .document
+assertMatch ${TEST_LOG} "gator"
 endTest
 
 beginTest "Testing --keywords WARNING"
-echo foo | route-message.sh --keywords WARNING
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(exist .emails .header .subject .message .send)
-assertFalse $(exist .pagers .incident .document)
+echo "peak" | route-message.sh --keywords WARNING
+assertMissing .pagers .incident .document
+assertFile .emails .header .subject .message .send
+assertMatch ${TEST_LOG} "peak"
 endTest
 
 beginTest "Testing --keywords EMAIL"
-echo foo | route-message.sh --keywords EMAIL
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(exist .emails .header .subject .message .send)
-assertFalse $(exist .pagers .incident .document)
+echo "lark" | route-message.sh --keywords EMAIL
+assertFile .emails .header .subject .message .send
+assertMissing .pagers .incident .document
+assertMatch ${TEST_LOG} "lark"
 endTest
 
 beginTest "Testing --keywords CRITICAL"
-echo foo | route-message.sh --keywords CRITICAL
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(exist .pagers .emails .header .subject .message .send)
-assertFalse $(exist .incident .document)
+echo "vine" | route-message.sh --keywords CRITICAL
+assertFile .pagers .emails .header .subject .message .send
+assertMissing .incident .document
+assertMatch ${TEST_LOG} "vine"
 endTest
 
 beginTest "Testing --keywords PAGE"
-echo foo | route-message.sh --keywords PAGE
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(exist .pagers .emails .header .subject .message .send)
-assertFalse $(exist .incident .document)
+echo "flask" | route-message.sh --keywords PAGE
+assertFile .pagers .emails .header .subject .message .send
+assertMissing .incident .document
+assertMatch ${TEST_LOG} "flask"
 endTest
 
 beginTest "Testing --keywords TRASH"
-echo foo | route-message.sh --keywords TRASH
-assertFalse $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertFalse $(exist .pagers .emails .header .subject .message .send .incident .document)
+echo "trash" | route-message.sh --keywords TRASH
+assertMissing .pagers .emails .header .subject .message .send .incident .document
+assertNomatch ${TEST_LOG} "trash"
 endTest
 
 beginTest "Testing --emails option"
-echo foo | route-message.sh --keywords EMAIL --emails "john@doe.com" 
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(exist .emails .header .subject .message .send)
-assertFalse $(exist .pagers .incident .document)
+echo "bass" | route-message.sh --keywords EMAIL --emails "john@doe.com" 
+assertFile .emails .header .subject .message .send
+assertMissing .pagers .incident .document
+assertMatch .emails "john@doe.com"
+assertMatch ${TEST_LOG} "bass"
 endTest
 
 beginTest "Testing --pagers option"
-echo foo | route-message.sh --keywords PAGE --pagers "jane@doe.com"
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(exist .pagers .emails .header .subject .message .send)
-assertFalse $(exist .incident .document) 
-assertTrue $(grepFile ".pagers" "jane@doe.com")
+echo "henry" | route-message.sh --keywords PAGE --pagers "jane@doe.com"
+assertFile .pagers .emails .header .subject .message .send
+assertMissing .incident .document
+assertMatch .pagers "jane@doe.com"
+assertMatch ${TEST_LOG} "henry"
 endTest
 
 beginTest "Testing --nolog option"
-echo foo | route-message.sh --nolog
-assertFalse $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+echo "game" | route-message.sh --nolog
+assertMissing .emails .header .subject .message .send .pagers .incident .document
+assertNomatch ${TEST_LOG} "game"
 endTest
 
 beginTest "Testing --audit"
-echo foo | route-message.sh --audit 
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(grepLog "LOGFILE=${WAHOO_AUDIT_LOG}")
-assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+echo "taco" | route-message.sh --audit 
+assertMissing .emails .header .subject .message .send .pagers .incident .document
 endTest
 
 beginTest "Testing --audit --nolog"
-echo foo | route-message.sh --audit --nolog
-assertFalse $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(grepLog "LOGFILE=${WAHOO_AUDIT_LOG}")
-assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+echo "bell" | route-message.sh --audit --nolog
+assertMissing .emails .header .subject .message .send .pagers .incident .document
+assertMatch ${WAHOO_AUDIT_LOG} "bell"
+assertNomatch ${TEST_LOG} "bell"
 endTest
 
-beginTest "Testing --log ${TMP}/tdd/alt.log"
-echo foo | route-message.sh --log ${TMP}/tdd/alt.log
-assertFalse $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(grepFile "alt.log" "foo")
-assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+beginTest "Testing --log ${TEST_FILE}1"
+echo "machine" | route-message.sh --log ${TEST_FILE}1
+assertFile ${TEST_FILE}1
+assertMissing .emails .header .subject .message .send .pagers .incident .document
+assertMatch ${TEST_FILE}1 "machine"
 endTest
 
 beginTest "Testing --incident foo"
-echo foo | route-message.sh --incident foo
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(exist .header .subject .message .send .incident)
-assertFalse $(exist .emails .pagers .documents)
+echo "beep" | route-message.sh --incident foo
+assertFile .header .subject .message .send .incident
+assertMissing .emails .pagers .documents
+assertMatch ${TEST_LOG} "beep"
 endTest
 
 beginTest "Testing --incident foo --keywords EMAIL"
-echo foo | route-message.sh --incident foo --keywords EMAIL
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(exist .header .subject .message .send .incident .emails)
-assertFalse $(exist .pagers .documents)
+echo "coffee" | route-message.sh --incident foo --keywords EMAIL
+assertFile .header .subject .message .send .incident .emails
+assertMissing .pagers .documents
+assertMatch ${TEST_LOG} "coffee"
 endTest
 
 beginTest "Testing --document foo.txt"
-echo foo | route-message.sh --document foo.txt
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(grepFile ".document" "foo.txt")
-assertTrue $(exist .header .subject .message .send)
-assertFalse $(exist .emails .pagers .incident)
+echo "camper" | route-message.sh --document foo.txt
+assertMatch .document "foo.txt"
+assertFile .document .header .subject .message .send
+assertMissing .emails .pagers .incident
 endTest
 
-KEYWORD_OVERRIDES="CRITICAL=LOG, WARNING=LOG, PAGE=EMAIL"
+export KEYWORD_OVERRIDES="CRITICAL=LOG, WARNING=LOG, PAGE=EMAIL"
 
 beginTest "Testing --keywords CRITICAL with KEYWORD_OVERRIDE"
-echo foo | route-message.sh --keywords CRITICAL 
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+echo "belt" | route-message.sh --keywords CRITICAL 
+assertMissing .emails .header .subject .message .send .pagers .incident .document
+assertMatch ${TEST_LOG} "belt"
 endTest
 
 beginTest "Testing --keywords WARNING with KEYWORD_OVERRIDE"
-echo foo | route-message.sh --keywords WARNING
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertFalse $(exist .emails .header .subject .message .send .pagers .incident .document)
+echo "think" | route-message.sh --keywords WARNING
+assertMissing .emails .header .subject .message .send .pagers .incident .document
+assertMatch ${TEST_LOG} "think"
 endTest
 
 beginTest "Testing --keywords PAGE with KEYWORD_OVERRIDE"
-echo foo | route-message.sh --keywords PAGE
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(exist .emails .header .subject .message .send)
-assertFalse $(exist .pagers .incident .document)
+echo "habit" | route-message.sh --keywords PAGE
+assertFile .emails .header .subject .message .send
+assertMissing .pagers .incident .document
+assertMatch ${TEST_LOG} "habit"
 endTest
 
-KEYWORD_OVERRIDES="CRITICAL=LOG,WARNING=TRASH,PAGE=TYPO,INFO=EMAIL"
+export KEYWORD_OVERRIDES="CRITICAL=LOG,WARNING=TRASH,PAGE=TYPO,INFO=EMAIL"
+
 NAME="Testing --keywords PAGE with an invalid KEYWORD_OVERRIDE"
-echo foo | route-message.sh --keywords PAGE 2> ${TMP}/tdd/stderr
+echo "dark" | route-message.sh --keywords PAGE 2> ${TEST_FILE}2
 # An error in the keyword should still result in the message being logged.
-assertTrue $(grepLog "LOGFILE=${WAHOO_MESSAGE_LOG}")
-assertTrue $(grepFile "stderr" "KEYWORD TYPO is not recognized")
+assertMatch ${TEST_FILE}2 "KEYWORD TYPO is not recognized"
+assertMatch ${TEST_LOG} "dark"
 endTest
 

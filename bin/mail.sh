@@ -50,6 +50,7 @@ done
 
 SUBJECT="${1}"
 WAHOO_MAIL_TO="${2}"
+WAHOO_MAIL_LOG=${WAHOO_MAIL_LOG:-"${WAHOO}/log/mail.log"}
 
 [[ -z ${SUBJECT} ]] && SUBJECT="Mail: $(hostname) @ $(date) from $(whoami)"
 WAHOO_MAIL_TO=${WAHOO_MAIL_TO:-${WAHOO_EMAILS}}
@@ -59,12 +60,18 @@ while read -r INPUT; do
    echo "${INPUT}" >> ${TMPFILE}
 done
 
-head -${MAX_LINES} ${TMPFILE} > ${TMPFILE}.2 
+LINES=$(cat ${TMPFILE} | wc -l)
+if (( ${LINES} > ${MAX_LINES} )); then
+   head -${MAX_LINES} ${TMPFILE} > ${TMP}/$$
+   mv ${TMP}/$$ ${TMPFILE}
+   applog.sh "$(basename $0) - Mail \"${SUBJECT}\" exceeds max lines."
+   LINES=$(cat ${TMPFILE} | wc -l)
+fi
 
 # mail or mailx works for mail program.
-${WAHOO_MAIL_PROGRAM} -s "${SUBJECT}" "${WAHOO_MAIL_TO}" < ${TMPFILE}.2
+${WAHOO_MAIL_PROGRAM} -s "${SUBJECT}" "${WAHOO_MAIL_TO}" < ${TMPFILE}
 
-tdd.sh log "LINES=$(cat ${TMPFILE}.2 | wc -l)"
+echo "$(date) \${SUBJECT}\" to \"${WAHOO_MAIL_TO}\" (lines=${LINES})" >> ${WAHOO_MAIL_LOG}
 
 exit 0
 

@@ -75,7 +75,9 @@ debug.sh -1 "$$ $(basename $0) $*"
 
 . ${WAHOO}/bin/.wahoo-functions.sh
 
-MESSAGE_FOLDER=${TMP}/messages/$(time.sh epoch)-$$
+# This should only already be set when running test-route-message.sh
+MESSAGE_FOLDER=${MESSAGE_FOLDER:-${TMP}/messages/$(time.sh epoch)-$$}
+
 mkdir -p ${MESSAGE_FOLDER}
 cd ${MESSAGE_FOLDER} || (error.sh "$0 - Message folder ${MESSAGE_FOLDER} not found!" && exit 1)
 mv ${TMPFILE} ${MESSAGE_FOLDER}/.message
@@ -129,7 +131,7 @@ if [[ -n ${MESSAGE_KEYWORDS} ]]; then
             return
             ;;
          *)
-             error.sh "$0 - KEYWORD ${k} is not recognized! Will use \"LOG\" instead."
+            error.sh "$0 - KEYWORD ${k} is not recognized! Will use \"LOG\" instead."
             ;;
       esac
    done
@@ -153,7 +155,6 @@ echo ${SUBJECT} > .subject
 header > .header 
 for f in ${WAHOO_MESSAGE_LOG} ${MESSAGE_LOGS} ${AUDIT_LOG}; do
    cat .header .message >> ${f} 
-   tdd.sh log "LOGFILE=${f}"
 done 
 if [[ -n ${DOCUMENT} ]]; then 
    echo "${DOCUMENT}" > .document
@@ -164,11 +165,9 @@ fi
 touch .send
 
 if [[ ! -f .emails && ! -f .pagers && ! -f .document && ! -f .incident ]]; then
-   cd ..; rm -rf ${MESSAGE_FOLDER}
-else
-   for f in $(find ${MESSAGE_FOLDER} -type f); do
-      tdd.sh copy ${f}
-   done
+   if [[ "${MESSAGE_FOLDER}" != "${TMP}/test" ]]; then
+      cd ..; rm -rf ${MESSAGE_FOLDER}
+   fi
 fi
 
 exit 0

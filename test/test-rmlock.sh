@@ -10,8 +10,8 @@ endTest
 
 beginTest "rmlock.sh"
 crlock.sh --remove foo && crlock.sh foo
-assertTrue $(crlock.sh foo || echo 1)
+assertOne $(crlock.sh foo || echo 1)
 rmlock.sh foo
-assertTrue $(crlock.sh foo && echo 1)
+assertOne $(crlock.sh foo && echo 1)
 rmlock.sh foo
 endTest

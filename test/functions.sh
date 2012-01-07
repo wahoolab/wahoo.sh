@@ -77,6 +77,20 @@ function grepMatch {
    fi
 }
 
+function assertMatch {
+   logtest "$0 $*"
+   if (( $(grepMatch "${1}" "${2}") == 0 )); then
+      fail 
+   fi
+}
+
+function assertNomatch {
+   logtest "$0 $*"
+   if (( $(grepMatch "${1}" "${2}") > 0 )); then
+      fail
+   fi
+}
+
 function grepFile {
    logtest "$0 $*"
    # $1 is name of file, $2 is pattern to search for.
@@ -139,7 +153,13 @@ function assertTrue {
 
 function assertFile {
    logtest "$0 $*"
-   [[ -f ${1} ]] || fail "$0 - $*"
+   while (( $# > 0 )); do
+      if [[ ! -f ${1} && ! -f ${TEST_DIR}/${1} ]]; then
+         fail
+         break
+      fi
+      shift
+   done
 }
 
 function assertDir {
@@ -149,7 +169,13 @@ function assertDir {
 
 function assertMissing {
    logtest "$0 $*"
-   [[ ! -d ${f} && ! -f ${f} ]] || "$0 - $*"
+   while (( $# > 0 )); do
+      if [[ -d ${1} || -f ${1} ]]; then
+         fail
+         break
+      fi
+      shift
+   done 
 }
 
 function assertFalse {

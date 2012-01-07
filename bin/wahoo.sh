@@ -3,7 +3,7 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-WAHOO_VERSION=20111227
+WAHOO_VERSION=20110104
 
 function usage {
 cat <<EOF

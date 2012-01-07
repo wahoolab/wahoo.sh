@@ -9,11 +9,11 @@ assertHelp
 endTest
 
 beginTest "error.sh \"foo\""
-error.sh "foo" 2> ${TMP}/tdd/error.log
-assertTrue $(grepFile "error.log" "foo")
+error.sh "foo" 2> ${TEST_FILE}
+assertMatch ${TEST_FILE} "foo"
 endTest
 
 beginTest "echo foo | error.sh"
-echo "foo" | error.sh 2> ${TMP}/tdd/error.log
-assertTrue $(grepFile "error.log" "foo")
+echo "foo" | error.sh 2> ${TEST_FILE}
+assertMatch ${TEST_FILE} "foo"
 endTest
