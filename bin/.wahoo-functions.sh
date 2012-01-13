@@ -8,10 +8,6 @@ General functions used within Wahoo.
 
 Functions:
 
-   get_os_load_average
-
-      Return the current 5 minute load average.
-
    select_input_by_item_number
 
       See .wahoo-setup for an example of how this function is used to 
@@ -42,10 +38,6 @@ exit 0
 }
 
 [[ "${1}" == "--help" ]] && functions_help
-
-function get_os_load_average {
-   uptime | awk '{ print substr($(NF-2),1,4) }'
-}   
 
 function select_input_by_item_number {
 # ToDo: Support large numbers of items using >1 columns.
@@ -112,10 +104,6 @@ if [ ! -f /tmp/wahoo ]; then
    cp ${WAHOO}/tmp/$(hostname)/ksh /tmp/wahoo 
    chmod 700 /tmp/wahoo
 fi
-
-# Attempt to load ~/.wahoo configuration file.
-[ -f .wahoo ] && \$(. .wahoo 2> /dev/null)
-[ -f ~/.wahoo ] && . ~/.wahoo
 
 ${WAHOO}/bin/.wahoo-check-events.sh
 

@@ -52,13 +52,13 @@ WAHOO_APP_LOG=\${WAHOO}/log/wahoo.log
 WAHOO_DEBUG_LEVEL=1
 
 # Name of debug file. 
-WAHOO_DEBUG_LOG=${WAHOO}/log/debug.log
+WAHOO_DEBUG_LOG=\${WAHOO}/log/debug.log
 
 # Name of default audit log file (used when messages are tagged with the KEYWORD "AUDIT".
-WAHOO_AUDIT_LOG=${WAHOO}/log/audit.log
+WAHOO_AUDIT_LOG=\${WAHOO}/log/audit.log
 
 # Name of file messages are log to when messages are routed using the LOG keyword.
-WAHOO_MESSAGE_LOG=${WAHOO}/log/messages.log
+WAHOO_MESSAGE_LOG=\${WAHOO}/log/messages.log
 
 # 80 single dashes. Used in scripts.
 LINE1=$(printf %80s|tr ' ' "-")

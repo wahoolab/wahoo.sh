@@ -1,4 +1,6 @@
 
+# ToDo: Add tests for new str.sh functions remove, replace and ?
+
 # Standard test file header.
 . ${WAHOO}/test/functions.sh
 cd ${TMP}

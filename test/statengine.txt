@@ -60,3 +60,8 @@ Is there a maximum # of data points which can be passed to this script?
 Not yet, but there should be some sort of threshold to limit some sort
 of runaway process.
 
+What if I wanted to use this script to process 100's of inbound queues?
+Can I run multiple instances of the statengined.sh without conflict concerns?
+-----------------------------------------------------------------------------
+This should work fine and I will be adding tests for this feature.
+

@@ -38,6 +38,18 @@ Options:
 
       Left justify.
 
+   "remove" [character]
+
+      Remove all occurances of character.
+
+   "count" [character]
+
+      Return the count of characters found in input.
+
+   "replace" [characters] [character]
+
+      Replace any characters with character.
+
 EOF
 exit 0
 }
@@ -55,6 +67,12 @@ while read -r INPUT; do
    echo "${INPUT}" >> ${TMPFILE}
 done
 # IFS=${OIFS}
+
+function character_count {
+   COUNT=$(grep "${1}" -o ${TMPFILE} | wc -l)
+   debug.sh -3 "$$ str.sh character_count found ${COUNT} ${1}"
+   echo ${COUNT}
+}
 
 function convert_case {
    (
@@ -85,6 +103,16 @@ function nocomment {
    mv ${TMPFILE}.2 ${TMPFILE}
 }
 
+function remove_character {
+   tr -d "${1}" < ${TMPFILE} > ${TMPFILE}.2
+   mv ${TMPFILE}.2 ${TMPFILE}   
+}
+
+function replace_characters {
+   tr "${1}" "${2}" < ${TMPFILE} > ${TMPFILE}.2
+   mv ${TMPFILE}.2 ${TMPFILE}
+}
+
 function left {
    # typeset -L INPUT
    (
@@ -95,6 +123,7 @@ function left {
    mv ${TMPFILE}.2 ${TMPFILE}
 }
 
+NOCAT=
 while (( $# > 0 )); do
    case "${1}" in
       "upper"|"ucase") 
@@ -121,8 +150,20 @@ while (( $# > 0 )); do
       "left")
          left
          ;;
+      "remove")
+         shift
+         remove_character ${1}
+         ;;
+      "count")
+         character_count "${2}"
+         NOCAT=Y
+         ;;
+      "replace")
+         replace_characters "${2}" "${3}"
+         shift; shift
+         ;;
    esac
    shift
 done
 
-cat ${TMPFILE}
+[[ -z ${NOCAT} ]] && cat ${TMPFILE}

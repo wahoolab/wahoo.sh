@@ -3,7 +3,9 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-# debug.sh "$$ $(basename $0) $*"
+# WAHOO_DEBUG_LEVEL=3
+
+debug.sh "$$ $(basename $0) $*"
 
 # ToDo: Auto-restart after N hours or N size? Will we have memory leaks using arrays?
 # ToDo: Does this program get slower over time?
@@ -13,18 +15,40 @@
 # ToDo: Need a .log file.
 # ToDo: Track historical averages? Dump and read every hour? Scoring? Violating KISS?
 # ToDo: Aggregation of log files will be done as a separate job.
+# ToDo: Respond to SIGHUP to resource variables.
+# ToDo: Can I run 100's of instances of this program?
 
-WAHOO_DEBUG_LEVEL=0
+# WAHOO_DEBUG_LEVEL=3
 
-# ToDo: These options need to be in the .${f} file.
-DECIMALS=2
+# These must be upper-case.
 typeset -u ALLOW_NEGATIVE_VALUES CONVERSION_TYPE
+
+# Counters frequently reset and when that happens the delta between the last and current
+# value could be negative. When set to 'N' negative values are replaced with a zero and
+# a message is written to the application log.
 ALLOW_NEGATIVE_VALUES=N
+
+# Default statengine log file.
 STATENGINE_LOG_FILE=${WAHOO}/log/statengine.log
+
+# Default sleep interval.
 SLEEP_INTERVAL=60
+
+# Default inbox.
+INBOX=${TMP}/statengined/in
+
+DEFAULT_OUTPUT_FILE="${WAHOO}/log/statengine.out"
+
 while (( $# > 0)); do
    case $1 in
-      --sleep-interval) shift; SLEEP_INTERVAL="${1}" ;;
+      # Seconds to sleep between checking inbox for new items.
+      --sleep-interval) shift; SLEEP_INTERVAL="${1}"      ;;
+      # Full path to alternate log file.
+      --log)            shift; STATENGINE_LOG_FILE="${1}" ;;
+      # Full path to alternate inbox.
+      --inbox)          shift; INBOX="${1}"               ;;
+      # Full path to alternate default output file.
+      --output-file)    shift; DEFAULT_OUTPUT_FILE="${1}" ;;
       *) break ;;
    esac
    shift
@@ -34,10 +58,8 @@ done
 # Sleep interval must be at least 1 second.
 (( ${SLEEP_INTERVAL} <= 0 )) && SLEEP_INTERVAL=1
 
-# ToDo: Might want to allow a seperate daemons to look in different work queues.
-DEFAULT_QUEUE=${TMP}/statengine/default_queue
-[[ ! -d ${DEFAULT_QUEUE} ]] && mkdir -p ${DEFAULT_QUEUE}
-cd ${DEFAULT_QUEUE} || exit 1
+[[ ! -d ${INBOX} ]] && mkdir -p ${INBOX}
+cd ${INBOX} || exit 1
 
 function get_current_time {
    # Very expensive call, limit these!
@@ -52,7 +74,7 @@ function get_value_delta {
 
 function get_seconds_delta {
    # ToDo: Potential for error here is last_time is not set. Impact of checking?
-   echo $( ((STAT_TIME-${last_time[$KEY]})) )
+   echo $( ((EPOCH_TIME-${last_time[$KEY]})) )
 }
 
 # FYI: For arrays foo[${bar}]="x" does not seem to work, use foo[$bar]="x" instead.
@@ -66,10 +88,12 @@ DAEMON_START_TIME=$(get_current_time)
 # Keep track of total # of stats processed since start time.
 TOTAL_STAT_COUNT=0
 
-applog.sh "$(basename $0) - Starting statengined"
+applog.sh "$(basename $0) - statengined is alive"
 
 # Main outer loop, keep looping until the program is killed.
 while ((1)); do
+
+   debug.sh -3 "$$ pwd=$(pwd)"
 
    ls | while read f; do
 
@@ -82,27 +106,29 @@ while ((1)); do
 
       PROCESSING_TIME=$(get_current_time)
 
-      # debug.sh -3 "Working on file ${f}"
+      debug.sh -3 "Working on file ${f}"
 
       # Record Format:
-      # [METRIC_GROUP_NAME],[CONVERSION_TYPE IN NONE|DELTA|MINUTE|HOUR|DAY]
-      # cat .${f} | read CONVERSION_TYPE
+      # Statistics Group, Conversion Type (NONE, DELTA, MINUTE, HOUR, DAY), Output File, Statistics Host
       OIFS=${IFS}; IFS=","
-      cat .${f} | read METRIC_GROUP CONVERSION_TYPE
+      cat .${f} | read STATISTICS_GROUP CONVERSION_TYPE OUTPUT_FILE STATISTICS_HOST DECIMALS
+
+      [[ -z "${DECIMALS}"    ]] && DECIMALS=2
+      [[ -z "${OUTPUT_FILE}" ]] && OUTPUT_FILE="${DEFAULT_OUTPUT_FILE}"
 
       # Record Format:
-      # [EPOCH],[KEY],[VALUE]
+      # Epoch, Time, Key, Value
       # ToDo: Need to sort oldest to newest in case that has not already been done in the file.
-      cat ${f} | while read STAT_TIME KEY VALUE; do
-         # debug.sh -3 "STAT_TIME=${STAT_TIME}, KEY=${KEY}, VALUE=${VALUE}"
+      cat ${f} | while read EPOCH_TIME LONG_TIME KEY VALUE; do
+         debug.sh -3 "KEY=${KEY}"
+         KEY=$(echo "${KEY}" | str.sh "remove" "." | str.sh "nospace")
+         debug.sh -3 "EPOCH_TIME=${EPOCH_TIME}, KEY=${KEY}, VALUE=${VALUE}"
          CONVERTED_VALUE=
-         # debug.sh -3 "last_unconverted_value[$KEY]=${last_unconverted_value[$KEY]}"
-         if [[ -z ${last_unconverted_value[$KEY]} ]]; then
-            # debug.sh -3 "key not found, setting converted value to zero"
+         debug.sh -3 "last_unconverted_value[$KEY]=${last_unconverted_value[$KEY]}"
+         if [[ -z "${last_unconverted_value[$KEY]}" ]]; then
+            debug.sh -3 "key not found"
             if [[ ${CONVERSION_TYPE} == "NONE" ]]; then
                CONVERTED_VALUE="${VALUE}"
-            else
-               CONVERTED_VALUE=
             fi
          else
             case ${CONVERSION_TYPE} in
@@ -135,10 +161,10 @@ while ((1)); do
             DAY)    ((CONVERTED_VALUE=CONVERTED_VALUE*60*60*24)) ;;
          esac
 
-         # debug.sh -3 "Setting last_unconverted_value[$KEY]=${VALUE}"
+         debug.sh -3 "Setting last_unconverted_value[$KEY]=${VALUE}"
          last_unconverted_value[$KEY]=${VALUE}
-         # debug.sh -3 "xyz is ${last_unconverted_value[${KEY}]}"
-         last_time[${KEY}]=${STAT_TIME}
+         debug.sh -3 "xyz is ${last_unconverted_value[${KEY}]}"
+         last_time[${KEY}]=${EPOCH_TIME}
 
          if (( ${CONVERTED_VALUE} < 0 )) && [[ ${ALLOW_NEGATIVE_VALUES} != "Y" ]]; then
             CONVERTED_VALUE=0
@@ -146,9 +172,9 @@ while ((1)); do
          fi
 
          if [[ -n ${CONVERTED_VALUE} ]]; then
-            # ToDo: Do we need to figure out how to use time tuple here?
-            # Todo: How are we going to define the output file here?
-            echo "${STAT_TIME},${METRIC_GROUP},${KEY},$(printf "%.${DECIMALS}f" ${CONVERTED_VALUE}),${CONVERSION_TYPE}" >> $TMP/statengine.log
+            OUTPUT="${EPOCH_TIME},${LONG_TIME},${STATISTICS_GROUP},${KEY},$(printf "%.${DECIMALS}f" ${CONVERTED_VALUE}),${CONVERSION_TYPE}" 
+            debug.sh -3 "$$ ${OUTPUT}"
+            echo "${OUTPUT}" >> "${OUTPUT_FILE}"
          fi
          ((TOTAL_STAT_COUNT=TOTAL_STAT_COUNT+1))
       done
@@ -162,9 +188,8 @@ while ((1)); do
       fi
    done
    # Pause and wait a bit before check for new files.
-   # ToDo: This needs to be an option and must be >= 1.
    sleep ${SLEEP_INTERVAL}
-   debug.sh -3 "$(basename $0) - Checking for stats to process"
+   debug.sh -3 "$$ Checking for stats to process"
 done
 
 exit 0

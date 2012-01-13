@@ -128,9 +128,9 @@ MATCH="MATCH"
 [[ ${MATCH} == "MATCH" && ${DAY_OF_WEEK} != "*" ]] && MATCH=$(check_for_match "${DAY_OF_WEEK}" $(date +"%w"))
 
 if [[ "${MATCH}" == "MATCH" ]]; then
-   debug.sh -3 "$$ true"
+   debug.sh -2 "$$ matches"
    exit 0
 else
-   debug.sh -3 "$$ false"
+   debug.sh -3 "$$ does not match"
    exit 1 
 fi

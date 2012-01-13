@@ -3,9 +3,9 @@
 # ----------------
 crevent.sh --key "1min" --schedule "* * * * *" --silent
 
-FILE=${WAHOO}/event/1min/track-os-load.sh
+FILE=${WAHOO}/event/1min/monitor-os-load.sh
 if [[ ! -f ${FILE} ]]; then
-   echo "echo \"OS_LOAD_AVG \$(get_os_load.sh)\" | statengine.sh --group OS --/min" > ${FILE}
+   echo "monitor_os_load.sh" > ${FILE}
    chmod 700 ${FILE}
 fi
 

@@ -1,40 +1,60 @@
 #!/tmp/wahoo
 
+[[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
+[[ -f ~/.wahoo ]] && . ~/.wahoo
+
+# WAHOO_DEBUG_LEVEL=3
+
 function usage {
 cat <<EOF
 usage: statengine.sh [options] 
 
 Options:
 
-  --start
+   --start
 
-    Start the statengine daemon (statengined.sh).
+     Start the statengine daemon (statengined.sh).
    
-  --stop
+   --stop
 
-    Stop the statengine daemon. Warning, if \${STATENGINE} is
-    non-zero the scheduler will restart the daemon.
+     Stop the statengine daemon. Warning, if \${STATENGINE} is
+     non-zero the scheduler will restart the daemon.
 
-  --check-daemon
+   --check-daemon
       
-    Checks the value of \${STATENGINE} and starts the daemon 
-    if it is non-zero.
+     Checks the value of \${STATENGINE} and starts the daemon 
+     if it is greater than zero.
 
-  --group "[group-name]"
+   --group "[group-name]"
   
-    Define a group to associate with the values. Defaults to 
-    "statengine".
+     Define a group to associate with the values. Defaults to 
+     "statengine".
 
-  --/min
+   --/min
 
-    Instructs statengine to convert values to the rate per
-    minute.
+     Instructs statengine to convert values to the rate per
+     minute.
+
+   --output-file "[file-name]"
+
+     Instructs statengine to store stat history in a specific
+     file.
+
+   --stathost "[hostname]"
+
+     Hostname the stats originate from (defaults to localhost).
+
+   --decimals "[integer]"
+
+     The number of decimals to store.
 
 EOF
 exit 0
 }
 
 [[ "${1}" == "--help" ]] && usage
+
+debug.sh -2 "$$ $(basename $0) $*"
 
 TMPFILE=${TMP}/$$.tmp
 trap 'rm ${TMPFILE} 2> /dev/null' 0
@@ -59,6 +79,7 @@ function statengine_is_running {
 function start_statengine {
    SLEEP_INTERVAL=${1:-60}
    if ! (( $(statengine_is_running) )); then
+      applog.sh "Starting statengined (daemon)"
       statengined.sh --sleep-interval ${SLEEP_INTERVAL} &
       sleep 1
       if ! (( $(statengine_is_running) )); then
@@ -67,28 +88,15 @@ function start_statengine {
    fi
 }
 
-function daemon_may_restart_message {
-   if [[ -n ${STATENGINE} ]]; then
-      if (( ${STATENGINE} > 0 )); then
-         cat <<EOF
-
-   NOTE: The \${STATENGINE} configuration variable is set and 
-   the statengine daemon will be restart automatically if the
-   task scheduler is running. 
-
-EOF
-      fi
-   fi
-}
-
 function stop_statengine {
    if (( $(statengine_is_running) )); then
+      applog.sh "Stopping statengined (daemon)"
       get_statengine_processes | while read i; do    
          kill -9 ${i}
       done 
       sleep 1
       if (( $(statengine_is_running) )); then
-         error.sh "statengine.sh - Failed to stop."
+         error.sh "statengine.sh - Failed to stop statengined."
       fi 
    fi
 }
@@ -105,6 +113,8 @@ function check_daemon {
 
 GROUP="statengine"
 CONVERSION_TYPE="NONE"
+STATHOST="$(hostname)"
+DECIMALS=2
 while (( $# > 0)); do
    case $1 in
       --group) 
@@ -119,7 +129,6 @@ while (( $# > 0)); do
          ;;
       --stop)         
          stop_statengine
-         daemon_may_restart_message  
          exit 0
          ;;
       --check-daemon) 
@@ -130,6 +139,14 @@ while (( $# > 0)); do
 	 shift
          OUTPUT_FILE="${1}"
 	 ;;
+       --stathost)
+         shift
+         STATHOST="${1}" 
+         ;;
+        --decimals)
+         shift
+         DECIMALS="${1}"
+         ;;
       *) break 
 	 ;;
    esac
@@ -137,10 +154,21 @@ while (( $# > 0)); do
 done
 (( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
 
+l=0
+TIME=
 while read -r INPUT; do
-   echo "${INPUT}" >> ${INBOX}/${GROUP}.$$
+   debug.sh -3 "INPUT=${INPUT}"
+   # If time is not part of input we will add it.
+   if (( ${l} == 0 )); then
+      ((l=l+1))
+      if (( $(echo "${INPUT}" | str.sh "count" ",") < 2 )); then
+         TIME="$(time.sh statengine),"
+      fi
+   fi
+   echo "${TIME}${INPUT}" >> ${INBOX}/${GROUP}.$$
+   debug.sh -3 "$$ ${TIME}${INPUT}"
 done
 
-echo "${GROUP},${CONVERSION_TYPE},${OUTPUT_FILE}" >> ${INBOX}/.${GROUP}.$$
+echo "${GROUP},${CONVERSION_TYPE},${OUTPUT_FILE},${STATHOST},${DECIMALS}" >> ${INBOX}/.${GROUP}.$$
 
 exit 0
