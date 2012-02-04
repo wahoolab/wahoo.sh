@@ -3,8 +3,6 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-# WAHOO_DEBUG_LEVEL=3
-
 debug.sh "$$ $(basename $0) $*"
 
 # ToDo: Auto-restart after N hours or N size? Will we have memory leaks using arrays?
@@ -19,6 +17,11 @@ debug.sh "$$ $(basename $0) $*"
 # ToDo: Can I run 100's of instances of this program?
 
 # WAHOO_DEBUG_LEVEL=3
+
+# SIGHUP, reload .wahoo file.
+trap 'WAHOO=;. ~/.wahoo; debug.sh -1 "$$ Reloading .wahoo file"' SIGHUP
+TERMINATE=
+trap 'TERMINATE=Y' SIGTERM
 
 # These must be upper-case.
 typeset -u ALLOW_NEGATIVE_VALUES CONVERSION_TYPE
@@ -36,6 +39,8 @@ SLEEP_INTERVAL=60
 
 # Default inbox.
 INBOX=${TMP}/statengined/in
+mkdir -p ${INBOX}
+echo $$ > ${INBOX}/.pid
 
 DEFAULT_OUTPUT_FILE="${WAHOO}/log/statengine.out"
 
@@ -88,7 +93,7 @@ DAEMON_START_TIME=$(get_current_time)
 # Keep track of total # of stats processed since start time.
 TOTAL_STAT_COUNT=0
 
-applog.sh "$(basename $0) - statengined is alive"
+applog.sh "$(basename $0) - statengined is running"
 
 # Main outer loop, keep looping until the program is killed.
 while ((1)); do
@@ -183,11 +188,16 @@ while ((1)); do
       ((TOTAL_PROCESSING_TIME=TOTAL_PROCESSING_TIME+($(get_current_time)-PROCESSING_TIME)))
       ((TOTAL_DAEMON_RUN_TIME=$(get_current_time)-DAEMON_START_TIME))
       # Todo: This needs to go to the log file.
-      if [[ -n ${STATENGINE_LOG_FILE} ]]; then
-         echo "TOTALS: STATS=${TOTAL_STAT_COUNT} PROCESSING_TIME=${TOTAL_PROCESSING_TIME} RUN_TIME=${TOTAL_DAEMON_RUN_TIME}" >> ${STATENGINE_LOG_FILE}
-      fi
+      # if [[ -n ${STATENGINE_LOG_FILE} ]]; then
+      #    echo "TOTALS: STATS=${TOTAL_STAT_COUNT} PROCESSING_TIME=${TOTAL_PROCESSING_TIME} RUN_TIME=${TOTAL_DAEMON_RUN_TIME}" >> ${STATENGINE_LOG_FILE}
+      # fi
    done
+   if [[ -n ${TERMINATE} ]]; then
+      debug.sh -3 "$$ Terminating statengined"
+      break
+   fi
    # Pause and wait a bit before check for new files.
+   debug.sh -3 "$$ Sleeping for ${SLEEP_INTERVAL} seconds"
    sleep ${SLEEP_INTERVAL}
    debug.sh -3 "$$ Checking for stats to process"
 done

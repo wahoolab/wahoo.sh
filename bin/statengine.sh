@@ -20,6 +20,10 @@ Options:
      Stop the statengine daemon. Warning, if \${STATENGINE} is
      non-zero the scheduler will restart the daemon.
 
+   --kill
+
+     Kill the statengine daemon.
+
    --check-daemon
       
      Checks the value of \${STATENGINE} and starts the daemon 
@@ -79,7 +83,7 @@ function statengine_is_running {
 function start_statengine {
    SLEEP_INTERVAL=${1:-60}
    if ! (( $(statengine_is_running) )); then
-      applog.sh "Starting statengined (daemon)"
+      applog.sh "Starting statengine"
       statengined.sh --sleep-interval ${SLEEP_INTERVAL} &
       sleep 1
       if ! (( $(statengine_is_running) )); then
@@ -88,16 +92,37 @@ function start_statengine {
    fi
 }
 
-function stop_statengine {
+function kill_statengine {
    if (( $(statengine_is_running) )); then
-      applog.sh "Stopping statengined (daemon)"
-      get_statengine_processes | while read i; do    
+      applog.sh "Killed statengined"
+      get_statengine_processes | while read i; do
          kill -9 ${i}
       done 
-      sleep 1
+      sleep 1 
       if (( $(statengine_is_running) )); then
-         error.sh "statengine.sh - Failed to stop statengined."
+         error.sh "statengine.sh - Failed to kill statengined"
       fi 
+   fi
+}
+
+function stop_statengine {
+   PID=$(cat ${INBOX}/.pid 2> /dev/null)
+   if [[ -n ${PID} ]]; then
+      if (( $(ps -ef | grep "${PID}" | grep "statengined" | grep -v "grep" | wc -l) )); then
+         kill ${PID}
+         i=0
+         while (( ${i} < 120 )); do
+            ((i=i+1))
+            if (( $(ps -ef | grep "${PID}" | grep "statengined" | grep -v "grep" | wc -l) == 0 )); then
+               applog.sh "Stopped statengined"
+               break
+            fi
+            sleep 1
+         done
+         if (( ${i} == 120 )); then
+            kill_statengine
+         fi
+      fi
    fi
 }
 
@@ -129,6 +154,10 @@ while (( $# > 0)); do
          ;;
       --stop)         
          stop_statengine
+         exit 0
+         ;;
+      --kill)
+         kill_statengine
          exit 0
          ;;
       --check-daemon) 

@@ -1,18 +1,22 @@
+# Not invoking a shell here, the assumption is we should be in ksh
+# when this script is called.
 
+[[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
+[[ -f ~/.wahoo ]] && . ~/.wahoo
 
 function usage {
 cat <<EOF
-usage: applog.sh [options] "[string]"
+usage: applog.sh 
 
-Log an app message.
+Log a string to the application log file \${WAHOO_APP_LOG}.
 
-"[string]" is written to the \${WAHOO_APP_LOG}. 
+Note - All applog entries make a debug level 1 call.
 
-   Examples:
+Example:
 
-      applog.sh "Program Name - Short Message"
+   applog.sh "Program Name - Short Message"
 
-      cat ${file} | applog.sh 
+   cat somefile.txt | applog.sh 
 
 EOF
 exit 0
@@ -20,15 +24,17 @@ exit 0
 
 [[ "${1}" == "--help" ]] && usage
 
-function WriteApp {
+function WriteToAppLog {
    echo "${1}" >> ${WAHOO_APP_LOG} 
+   # App log is always a debug level 1 call.
+   debug.sh -1 "$$ applog.sh ${1}"
 }
 
 D="$(date)"
 if [[ -z "${1}" ]]; then
    while read -r INPUT; do
-      WriteApp "${D} ${INPUT}"
+      WriteToAppLog "${D} ${INPUT}"
    done
 else
-   WriteApp "${D} ${1}"
+   WriteToAppLog "${D} ${1}"
 fi

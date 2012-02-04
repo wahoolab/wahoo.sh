@@ -42,7 +42,7 @@ exit 0
 SENSOR_DIR=${TMP}/sensor
 [[ ! -d ${SENSOR_DIR} ]] && mkdir ${SENSOR_DIR}
 
-ALLOWABLE_TRYS=0
+ALLOWABLE_TRIES=0
 NOCHANGE=
 NOHEADER=
 COMMAND_LINE="$0 $*"
@@ -50,7 +50,7 @@ CLEAR=
 while (( $# > 0)); do
    case $1 in
       --key) shift; SENSOR_KEY="${1}" ;;
-      --try) shift; ALLOWABLE_TRYS="${1}" ;; 
+      --try) shift; ALLOWABLE_TRIES="${1}" ;; 
       --no-change) NOCHANGE="NOCHANGE" ;;
       --no-header) NOHEADER="NOHEADER" ;;
       --clear) CLEAR="CLEAR" ;;
@@ -66,62 +66,59 @@ SENSOR_DIR=${SENSOR_DIR}/${SENSOR_KEY}
 cd ${SENSOR_DIR} || error.sh "$0 - Count not change to directory ${SENSOR_DIR}."
 
 if [[ -n "${CLEAR}" ]]; then
-   rm in-1 in-2 t d 2> /dev/null     
+   rm .sensor-input .sensor-input-old .tries .diff 2> /dev/null     
    exit 0
 fi
 
 # debug.sh -3 "$0 - pwd=$(pwd)"
-cp /dev/null in-1
+cp /dev/null .sensor-input
 while read -r INPUT; do
-   echo "${INPUT}" >> in-1
+   echo "${INPUT}" >> .sensor-input
 done
 
 function return_with_header {
 cat <<EOF
-$(date) Sensor Triggered!
+$(date) Triggered!
 
 "${COMMAND_LINE}"
 
 Differences detected shown below.
 ${LINE1}
-$(cat d)
+$(cat .diff)
 Most recent sensor input shown below.
 ${LINE1}
-$(cat in-1)
+$(cat .sensor-input)
 EOF
 }
 
 function return_without_header {
-$(cat d)
+$(cat .diff)
 }
 
 function trigger_sensor {
 ( [[ -n ${NOHEADER} ]] && return_without_header || return_with_header ) | tee -a ${SENSOR_KEY}.log
 }
 
-if [[ ! -f in-2 ]]; then
-   cp in-1 in-2
-   debug.sh -3 "$$ in-2 does not exist"
+if [[ ! -f .sensor-input-old ]]; then
+   cp .sensor-input .sensor-input-old
 else
-   # cat in-1 | debug.sh -3
-   # cat in-2 | debug.sh -3
-   diff in-2 in-1 > d
-   debug.sh -3 "$$ NOCHANGE=${NOCHANGE}"
-   debug.sh -3 "$$ $(ls -alrt d)"
-   if [[ -z ${NOCHANGE} && -s d ]] || [[ -n ${NOCHANGE} && ! -s d ]]; then
-      echo "$(date) Sensor Missed!" >> ${SENSOR_KEY}.log
-      date >> t
-      debug.sh -3 "$$ TRYS=$(cat t | wc -l) ALLOWABLE_TRYS=${ALLOWABLE_TRYS}"
-      if (( $(cat t | wc -l) > ${ALLOWABLE_TRYS} )); then
+   # cat .sensor-input | debug.sh -3
+   # cat .sensor-input-old | debug.sh -3
+   diff .sensor-input-old .sensor-input > .diff
+   # debug.sh -3 "$$ NOCHANGE=${NOCHANGE}"
+   # debug.sh -3 "$$ $(ls -alrt .diff)"
+   if [[ -z ${NOCHANGE} && -s .diff ]] || [[ -n ${NOCHANGE} && ! -s .diff ]]; then
+      echo "$(date) Miss!" >> ${SENSOR_KEY}.log
+      date >> .tries
+      debug.sh -3 "$$ TRIES=$(wc -l < .tries) ALLOWABLE_TRIES=${ALLOWABLE_TRIES}"
+      if (( $(wc -l < .tries) > ${ALLOWABLE_TRIES} )); then
          trigger_sensor
-         cp in-1 in-2
-         debug.sh -2 "$$ ${COMMAND_LINE} (this sensor was triggered)"
+         cp .sensor-input .sensor-input-old
+         debug.sh -2 "$$ Sensor \"${SENSOR_KEY}\" Triggered"
       fi
    else
-      cp /dev/null t
+      cp /dev/null .tries
    fi
 fi
-
-rm in-1 2> /dev/null
 
 exit 0

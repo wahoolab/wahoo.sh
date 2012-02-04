@@ -57,8 +57,8 @@ WAHOO_DEBUG_LOG=\${WAHOO}/log/debug.log
 # Name of default audit log file (used when messages are tagged with the KEYWORD "AUDIT".
 WAHOO_AUDIT_LOG=\${WAHOO}/log/audit.log
 
-# Name of file messages are log to when messages are routed using the LOG keyword.
-WAHOO_MESSAGE_LOG=\${WAHOO}/log/messages.log
+# List of files to log messages to. Separate each file using a comma.
+WAHOO_MESSAGE_LOGS=\${WAHOO}/log/messages.log
 
 # 80 single dashes. Used in scripts.
 LINE1=$(printf %80s|tr ' ' "-")
@@ -125,11 +125,10 @@ MAX_LOCK_SECONDS=129600
 # Built In Monitors
 # -----------------------------------------------------------------------------
 
-# monitor_localhost_for_reboot.sh
-# Must be 'Y' (default) to enable this monitor.
-MONITOR_LOCALHOST_FOR_REBOOT_ENABLED=Y
+# monitor_reboots.sh
 # Keyword(s) used to route messages for this monitor. If more than one keyword separate with a comma.
-MONITOR_LOCALHOST_FOR_REBOOT_KEYWORDS="CRITICAL"
+# Leave blank if you do not want to monitor this host.
+MONITOR_REBOOTS_KEYWORDS="CRITICAL"
 
 # -----------------------------------------------------------------------------
 # Plugins

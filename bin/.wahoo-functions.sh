@@ -74,22 +74,22 @@ done
 }
 
 function create_tarball_for_release {
+set -x
 [[ ! -d ${WAHOO} ]] && return
 YMD=$(time.sh y-m-d)
 cd ${WAHOO}/..
-rm -rf ${WAHOO}${YMD}.tar.gz
-rm -rf ${WAHOO}${YMD} 2> /dev/null
-cp -rp ${WAHOO} ${WAHOO}${YMD}
-cd ${WAHOO}${YMD}
+cp -rp ${WAHOO} wahoo-alpha-${YMD}
+cd wahoo-alpha-${YMD}
 rm run.sh 2> /dev/null
-rm -rf domain tmp log event 2> /dev/null
+rm -rf release domain tmp log event 2> /dev/null
 # Remove oracle-osw
-rm -rf ${WAHOO}/plugin/oracle-osw/*
-cd ${WAHOO}/.. 
-tar -cf ${WAHOO}${YMD}.tar wahoo${YMD}
-gzip ${WAHOO}${YMD}.tar
-rm -rf ${WAHOO}${YMD}
-ls ${WAHOO}${YMD}.tar.gz
+rm -rf ./plugin/oracle-osw/*
+cd .. 
+tar -cf wahoo-alpha-${YMD}.tar wahoo-alpha-${YMD}
+gzip -f wahoo-alpha-${YMD}.tar
+rm -rf wahoo-alpha-${YMD}
+mv wahoo-alpha-${YMD}.tar.gz ${WAHOO}/release
+ls ${WAHOO}/release/wahoo-alpha-${YMD}.tar.gz
 }
 
 function create_run_file {
@@ -105,7 +105,7 @@ if [ ! -f /tmp/wahoo ]; then
    chmod 700 /tmp/wahoo
 fi
 
-${WAHOO}/bin/.wahoo-check-events.sh
+${WAHOO}/bin/.wahoo-check-events.sh 
 
 EOF
 ) > ${WAHOO}/run.sh

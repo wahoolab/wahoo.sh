@@ -9,11 +9,17 @@ if [[ ! -f ${FILE} ]]; then
    chmod 700 ${FILE}
 fi
 
+FILE=${WAHOO}/event/1min/check-messages.sh
+if [[ ! -f ${FILE} ]]; then
+   echo ".wahoo-check-messages.sh" > ${FILE}
+   chmod 700 ${FILE}
+fi
+
 crevent.sh --key "5min" --schedule "0,5,10,15,20,25,30,35,40,45,55 * * * *"  --silent
 
 FILE=${WAHOO}/event/5min/reboot_monitor.sh
 if [[ ! -f ${FILE} ]]; then
-   echo "monitor_localhost_for_reboot.sh" > ${FILE}
+   echo "monitor_reboots.sh" > ${FILE}
    chmod 700 ${FILE}
 fi
 
@@ -32,10 +38,5 @@ if [[ ! -f ${FILE} ]]; then
 fi
 
 crevent.sh --key "60min" --schedule "0 * * * *" --silent
-
-# Triggered Events
-# ----------------
-# The reboot event is triggered when monitor_localhost_for_reboot.sh detects a 
-# that the time returned by "who -b" changes.
 crevent.sh --key "reboot" --silent
 

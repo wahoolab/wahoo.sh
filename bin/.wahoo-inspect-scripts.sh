@@ -24,3 +24,11 @@ find ${WAHOO} -type f -name "*.sh" | while read f; do
       egrep "grep" ${f} | grep "wc -l" | issue ${f}
    fi
 done
+
+rule "Don't use cat with wc -l"
+find ${WAHOO} -type f -name "*.sh" | while read f; do
+   if $(egrep "grep" ${f} | grep "wc -l" | grep "cat " 1> /dev/null); then
+      egrep "grep" ${f} | grep "wc -l" | grep "cat " | issue ${f}
+   fi
+done
+

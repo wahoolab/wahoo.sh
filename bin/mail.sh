@@ -60,12 +60,12 @@ while read -r INPUT; do
    echo "${INPUT}" >> ${TMPFILE}
 done
 
-LINES=$(cat ${TMPFILE} | wc -l)
+LINES=$(wc -l < ${TMPFILE})
 if (( ${LINES} > ${MAX_LINES} )); then
    head -${MAX_LINES} ${TMPFILE} > ${TMP}/$$
    mv ${TMP}/$$ ${TMPFILE}
    applog.sh "$(basename $0) - Mail \"${SUBJECT}\" exceeds max lines."
-   LINES=$(cat ${TMPFILE} | wc -l)
+   LINES=$(wc -l < ${TMPFILE})
 fi
 
 # mail or mailx works for mail program.

@@ -11,10 +11,6 @@ trap 'rm ${TMPFILE} 2> /dev/null' 0
 
 touch ~/wahoo_setup.log && chmod 600 ~/wahoo_setup.log
 
-function setuplog {
-   echo "$(date) ${1}" >> ~/wahoo_setup.log
-}
-
 function first_file_found {
    # SEARCH_PATHS="/bin /usr /"
    SEARCH_PATHS="${1}"
@@ -29,36 +25,42 @@ function first_file_found {
       done
       [[ -n ${RESULT} ]] && break
    done
-   setuplog "first_file_found looked in ${SEARCH_PATH} for files ${FILE_NAMES} and RESULT=${RESULT}"
    echo ${RESULT}
 }
 
 if [[ $0 != ".wahoo-setup.sh" && $0 != "./.wahoo-setup.sh" && $0 != $(pwd)/.wahoo-setup.sh ]]; then
-   setuplog "ERROR: setup is being run from $(pwd)!"
    echo "ERROR: setup must be run from the \${WAHOO_HOME}/bin directory." && exit 1
 fi
 
+# cd to what is or will be ${WAHOO} (top level directory for wahoo).
 cd ..
 
 TMP=$(pwd)/tmp
  
 # Create required directories in ${WAHOO}.
-for d in tmp domain log; do
+for d in tmp domain log event; do
    [[ ! -d ${d} ]] && mkdir -p ${d}
+   chmod 700 ${d}
 done
 
-# Check if we have a copy of ksh 93. 
-if [[ ! -f ${TMP}/$(hostname)/ksh ]]; then
+# Try to locate Korn Shell 93 and install as /tmp/wahoo
+PATH_TO_KSH=
+if [[ -f ./domain/${WAHOO_DOMAIN}/resource/$(uname)-$(uname -m)/ksh ]]; then
+   PATH_TO_KSH="./domain/${WAHOO_DOMAIN}/resource/$(uname)-$(uname -m)/ksh" 
+else
    PATH_TO_KSH=$(which ksh)
-   printf "What is the full path ksh 93 binary [${PATH_TO_KSH}] > " && read ANSWER
+   printf "What is the full path to the Korn Shell 93 binary [${PATH_TO_KSH}] > " && read ANSWER
    PATH_TO_KSH=${ANSWER:-${PATH_TO_KSH}}
-   mkdir -p ${TMP}/$(hostname)
-   cp -p ${PATH_TO_KSH} ${TMP}/$(hostname)/ksh
 fi
 
-# Copy ksh 93 to /tmp/wahoo which gives us a known/universal location for the ksh binary (used in header of scripts).
 if [[ ! -f /tmp/wahoo ]]; then
-   cp -p ${TMP}/$(hostname)/ksh /tmp/wahoo
+   if [[ -f ${PATH_TO_KSH} ]]; then
+      cp ${PATH_TO_KSH} /tmp/wahoo
+      chmod 700 /tmp/wahoo
+   else
+      echo "Setup failed to locate a copy of Korn Shell 93."
+      exit 1
+   fi
 fi
 
 # If this variable is not set then we have a new install and the ~/.wahoo file did not exist.
@@ -96,7 +98,7 @@ if [[ -z ${WAHOO_HOME} || -z ${WAHOO} ]]; then
    [[ -z ${MESSAGE_SUBJECT_PREFIX} ]] && MESSAGE_SUBJECT_PREFIX="[${WAHOO_DOMAIN}]"
    if [[ -z ${WAHOO_MAIL_PROGRAM} ]]; then
       printf "\n%s\n\n" "Please select the program to use for sending mail."
-      (which mail; which mailx) | select_input_by_item_number
+      (which mail; which mailx; echo ".wahoo-mock-mail.sh") | select_input_by_item_number
       read SELECTION
       WAHOO_MAIL_PROGRAM=${item[$SELECTION]}
    fi       
@@ -108,6 +110,9 @@ else
    # Go ahead and remove any backups of this file older than 30 days.
    find ${TMP} -name ".wahoo.*" -mtime +30 -exec rm {} \;
 fi
+
+mkdir -p ./domain/${WAHOO_DOMAIN}/resource/$(uname)-$(uname -m)
+cp /tmp/wahoo ./domain/${WAHOO_DOMAIN}/resource/$(uname)-$(uname -m)/ksh
 
 [[ -z ${WAHOO_ZIP_PROGRAM} ]] && WAHOO_ZIP_PROGRAM=$(first_file_found "/bin /usr /" "gzip compress")
 WAHOO_HOME=$(pwd)
@@ -156,6 +161,6 @@ In order to enable automated schedules and provide event responses you will
 need to add the following to your crontab file. We suggest you run this 
 manually first and ensure there are no issues.
 
-* * * * * ${WAHOO_HOME}/run.sh
+* * * * * ${WAHOO_HOME}/run.sh 1> ${WAHOO_HOME}/log/stdout 2> ${WAHOO_HOME}/log/stderr
 EOF
 

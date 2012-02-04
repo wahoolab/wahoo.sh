@@ -3,13 +3,21 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-WAHOO_VERSION=20110104
+WAHOO_VERSION=20110203
 
 function usage {
 cat <<EOF
 usage: wahoo.sh [command] [options] [arguments] 
 
 General command utility for Wahoo.
+
+   wahoo.sh status
+
+      Return a list of statistics regarding the operation of Wahoo.
+
+   wahoo.sh find "string"
+
+      Search for a string in all wahoo related scripts and files.
 
    wahoo.sh tar
 
@@ -112,7 +120,23 @@ function set_wahoo_parm {
    [[ -s ${TEMPFILE} ]] && mv ${TEMPFILE} ${CONFIG_FILE}
 }
 
+function wahoo_status {
+cat <<EOF
+Wahoo Size (MB)              : $(expr $(du -sk $WAHOO | awk '{print $1}') / 1024)
+EOF
+}
+
 case ${1} in  
+   "status")
+      wahoo_status
+      ;; 
+   "find")
+      for d in bin domain event plugin; do
+         find ${WAHOO}/${d} -type f | while read f; do
+            egrep -iH "${2}" ${f}
+         done
+      done
+      ;;
    "log")
       # We just re-use debug.sh for our purposes here.
       WAHOO_DEBUG_LEVEL=1

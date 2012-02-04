@@ -4,9 +4,5 @@ if [ ! -f /tmp/wahoo ]; then
    chmod 700 /tmp/wahoo
 fi
 
-# Attempt to load ~/.wahoo configuration file.
-[ -f .wahoo ] && $(. .wahoo 2> /dev/null)
-[ -f ~/.wahoo ] && . ~/.wahoo
-
-/home/lab/Dropbox/wahoo/bin/.wahoo-check-events.sh
+/home/lab/Dropbox/wahoo/bin/.wahoo-check-events.sh 
 
