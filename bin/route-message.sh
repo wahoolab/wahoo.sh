@@ -78,8 +78,6 @@ debug.sh -1 "$$ $(basename $0) $*"
 # Create a unique directory which will store the message for processing.
 MESSAGE_DIR=${TMP}/messages/$(time.sh epoch)-$$
 mkdir -p ${MESSAGE_DIR}
-cd ${MESSAGE_DIR} || (error.sh "$0 - Message folder ${MESSAGE_DIR} not found!" && exit 1)
-mv ${TMPFILE} ${MESSAGE_DIR}/.message
 
 HOSTNAME=$(hostname)
 NOLOG=
@@ -141,6 +139,9 @@ while (( $# > 0)); do
 done
 (( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
 
+cd ${MESSAGE_DIR} || (error.sh "$0 - Message folder ${MESSAGE_DIR} not found!" && exit 1)
+mv ${TMPFILE} ${MESSAGE_DIR}/.message
+
 if [[ -n ${MESSAGE_KEYWORDS} ]]; then
    # This is from .wahoo-functions.sh
    replace_keywords_using_overrides "${MESSAGE_KEYWORDS}" | while read k; do
@@ -192,7 +193,7 @@ header > .header
 
 # Write to one or more log files.
 echo "${WAHOO_MESSAGE_LOGS}" | str.sh "split" "," | while read f; do
-   cat .header .message >> ${f} 
+   [[ -n ${f} ]] && cat .header .message >> ${f} 
 done 
 
 # Write document name to .document if defined.
