@@ -12,7 +12,15 @@ Overview
 
 Install
 
-   Download the OS Watcher tar file (for example oswbb4.0.tar) and put it in
+   Download OS Watcher Black Box from Oracle support. It should be a .tar 
+   file (oswbb4.0.tar for example). Put the file in 
    ${WAHOO}/plugin/oracle-oswbb.
 
-   Run install-oswbb.sh.
+   Set the OSWBB* parameters in the .wahoo configuration file. Wahoo will
+   install and start the program within 5 minutes if the Wahoo cron job is
+    running.
+   
+      # Number of hours to store files for.
+      OSWBB_ARCHIVE_HOURS=24
+      # Number of seconds to wait between snapshots.
+      OSWBB_SNAPSHOT_SECONDS=60
