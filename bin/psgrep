@@ -1,0 +1,7 @@
+
+
+EXPRESSION=${1:-".*"}
+
+ps -ef | grep -v "$$" | egrep "${EXPRESSION}"
+
+

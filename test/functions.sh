@@ -33,7 +33,7 @@ function assertSame {
 function nowTesting {
    FILE=${1}
    cat <<EOF
-${LINE1}
+
 $(basename ${FILE})
 ${LINE1}
 EOF
@@ -199,7 +199,11 @@ function assertZero {
 
 function assertOne {
    logtest "$0 $*"
-   (( ${1} == 1 )) || fail "$0 - $*"
+   if [[ -n ${1} ]]; then
+      (( ${1} == 1 )) || fail "$0 - $*"
+   else
+      fail "$0 - $*"
+   fi
 }
 
 function assertPositive {

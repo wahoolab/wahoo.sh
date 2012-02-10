@@ -74,7 +74,6 @@ done
 }
 
 function create_tarball_for_release {
-set -x
 [[ ! -d ${WAHOO} ]] && return
 YMD=$(time.sh y-m-d)
 cd ${WAHOO}/..

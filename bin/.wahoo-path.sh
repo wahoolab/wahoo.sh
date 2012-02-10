@@ -1,5 +1,17 @@
 
 
+function usage {
+cat <<EOF
+usage: .wahoo-path.sh
+
+Returns a value for PATH which has various directories added if they exist.
+
+exit 0
+EOF
+}
+
+[[ "${1}" == "--help" ]] && usage
+
 # Note: ${WAHOO}/domain/${WAHOO_DOMAIN}/bin and ${WAHOO}/bin are added in .wahoo-setup.sh, not here.
 
 WAHOO=${WAHOO:-$(pwd)}

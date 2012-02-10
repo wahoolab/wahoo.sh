@@ -30,10 +30,6 @@ General command utility for Wahoo.
       # Log a message to application log file \${WAHOO}/log/wahoo.log
       wahoo.sh log "Message"
 
-   wahoo.sh setup
-
-      Run Wahoo setup.
-
    wahoo.sh test
 
       Run the test suite.
@@ -154,13 +150,6 @@ case ${1} in
          vi ${CONFIG_FILE}
       else
          set_wahoo_parm "${1}" "${2}" "${CONFIG_FILE}"
-      fi
-      ;;
-   "setup") 
-      if [[ $0 != "wahoo.sh" && $0 != "./wahoo.sh" && $0 != $(pwd)/wahoo.sh ]]; then
-         echo "Error: setup must be run from the \${WAHOO_HOME}/bin directory." && exit 1
-      else
-         ./.wahoo-setup.sh
       fi
       ;;
    "test")

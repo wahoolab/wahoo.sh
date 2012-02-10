@@ -3,6 +3,19 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
+function usage {
+cat <<EOF
+usage: .wahoo-setup.sh
+
+Run when installing, moving or patching your \${WAHOO_HOME}. Should be run
+from \${WAHOO_HOME}/setup.sh.
+
+exit 0
+EOF
+}
+
+[[ "${1}" == "--help" ]] && usage
+
 # Need to export all variables automatically.
 set -a
 
