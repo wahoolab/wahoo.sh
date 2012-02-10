@@ -31,7 +31,7 @@ done
 (( $(has.sh option $*) )) && error.sh "$0 - \"$*\" contains an unrecognized option." && exit 1
 
 function run_all_scripts_in_background {
-   for script in $(ls * .command* 2> /dev/null); do
+   for script in $(ls * .command* .wahoo.sh 2> /dev/null); do
       # Go to next script if the current file is not executable.
       [[ ! -x ${script} ]] && continue
       debug.sh -1 "$$ event=$(basename $(pwd)) script=${script}"

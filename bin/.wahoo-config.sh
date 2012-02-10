@@ -134,11 +134,10 @@ MONITOR_REBOOTS_KEYWORDS="CRITICAL"
 # Plugins
 # -----------------------------------------------------------------------------
 
-# Oracle OS Watcher
-OSW_ENABLED=N
-OSW_INTERVAL=60
-OSW_HOURS_TO_STORE=24
-OSW_ZIP="Y"
+# Oracle OS Watcher Black Box
+OSWBB_SNAPSHOT_SECONDS=
+OSWBB_ARCHIVE_HOURS=
+OSWBB_LOG_FILE=\${WAHOO}/log/oswbb.log
 
 # You can configure settings for the entire domain in this file. These settings will over-ride the settings
 # in ~/.wahoo.
