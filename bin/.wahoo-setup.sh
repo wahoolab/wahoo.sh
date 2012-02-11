@@ -174,6 +174,6 @@ In order to enable automated schedules and provide event responses you will
 need to add the following to your crontab file. We suggest you run this 
 manually first and ensure there are no issues.
 
-* * * * * ${WAHOO_HOME}/run.sh 1> ${WAHOO_HOME}/log/stdout 2> ${WAHOO_HOME}/log/stderr
+* * * * * ${WAHOO_HOME}/bin/.wahoo-run.sh 1> ${WAHOO_HOME}/log/stdout 2> ${WAHOO_HOME}/log/stderr
 EOF
 

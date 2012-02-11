@@ -31,7 +31,7 @@ Functions:
    
    create_run_file
 
-      Used during setup to create the run.sh file in \${WAHOO}.
+      Used during setup to create the .wahoo-run.sh file in \${WAHOO}/bin.
 
 EOF
 exit 0
@@ -79,16 +79,14 @@ YMD=$(time.sh y-m-d)
 cd ${WAHOO}/..
 cp -rp ${WAHOO} wahoo-alpha-${YMD}
 cd wahoo-alpha-${YMD}
-rm run.sh 2> /dev/null
-rm -rf release domain tmp log event 2> /dev/null
+rm ./bin/.wahoo-run.sh 2> /dev/null
+rm -rf domain tmp log event 2> /dev/null
 # Remove oracle-osw
-rm -rf ./plugin/oracle-osw/*
 cd .. 
 tar -cf wahoo-alpha-${YMD}.tar wahoo-alpha-${YMD}
 gzip -f wahoo-alpha-${YMD}.tar
 rm -rf wahoo-alpha-${YMD}
-mv wahoo-alpha-${YMD}.tar.gz ${WAHOO}/release
-ls ${WAHOO}/release/wahoo-alpha-${YMD}.tar.gz
+mv wahoo-alpha-${YMD}.tar.gz ${WAHOO}/tmp/
 }
 
 function create_run_file {
@@ -98,6 +96,11 @@ function create_run_file {
 [[ -z ${WAHOO} ]] && return
 (
 cat <<EOF
+
+# Everything here must be bash shell compliant!
+
+[ -f /tmp/.wahoo-stop ] && exit 0
+
 # Always automatically replace /tmp/wahoo if it has been removed for some reason.
 if [ ! -f /tmp/wahoo ]; then 
    cp ${WAHOO}/tmp/$(hostname)/ksh /tmp/wahoo 
@@ -107,7 +110,7 @@ fi
 ${WAHOO}/bin/.wahoo-check-events.sh 
 
 EOF
-) > ${WAHOO}/run.sh
+) > ${WAHOO}/bin/.wahoo-run.sh
 
-chmod 700 ${WAHOO}/run.sh
+chmod 700 ${WAHOO}/bin/.wahoo-run.sh
 }

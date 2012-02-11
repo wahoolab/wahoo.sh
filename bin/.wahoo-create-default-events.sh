@@ -19,11 +19,12 @@ crevent.sh --key "5min" --schedule "0,5,10,15,20,25,30,35,40,45,55 * * * *"  --s
 
 FILE=${WAHOO}/event/5min/.wahoo.sh
 if [[ ! -f ${FILE} ]]; then
-   echo ".wahoo_event_5min.sh" > ${FILE}
+   echo ".wahoo-event-5min.sh" > ${FILE}
    chmod 700 ${FILE}
 fi
 
 crevent.sh --key "10min" --schedule "0,10,20,30,40,50 * * * *" --silent
 crevent.sh --key "60min" --schedule "0 * * * *" --silent
 crevent.sh --key "reboot" --silent
-
+crevent.sh --key "wahoo-stop" --silent
+crevent.sh --key "wahoo-start" --silent

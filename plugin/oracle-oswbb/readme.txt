@@ -18,7 +18,7 @@ Install
 
    Set the OSWBB* parameters in the .wahoo configuration file. Wahoo will
    install and start the program within 5 minutes if the Wahoo cron job is
-    running.
+   running.
    
       # Number of hours to store files for.
       OSWBB_ARCHIVE_HOURS=24
