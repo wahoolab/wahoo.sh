@@ -106,11 +106,6 @@ DELETE_TMP_FILES_AFTER_N_DAYS=${DELETE_TMP_FILES_AFTER_N_DAYS}
 # Used for test purposes only.
 WAHOO_TEST=
 
-# statengined.sh daemon is automatically started if this value in > 0. This value
-# represents the # of seconds the daemon sleeps between checking the queue for new
-# stats.
-STATENGINE=60
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # crlock.sh
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

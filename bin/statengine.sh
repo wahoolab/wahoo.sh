@@ -24,11 +24,6 @@ Options:
 
      Kill the statengine daemon.
 
-   --check-daemon
-      
-     Checks the value of \${STATENGINE} and starts the daemon 
-     if it is greater than zero.
-
    --group "[group-name]"
   
      Define a group to associate with the values. Defaults to 
@@ -126,16 +121,6 @@ function stop_statengine {
    fi
 }
 
-function check_daemon {
-   # Defined in your config file.
-   STATENGINE=${STATENGINE:-0}
-   if (( ${STATENGINE} > 0 )); then
-      if ! (( $(statengine_is_running) )); then
-         start_statengine ${STATENGINE}
-      fi
-   fi
-}
-
 GROUP="statengine"
 CONVERSION_TYPE="NONE"
 STATHOST="$(hostname)"
@@ -158,10 +143,6 @@ while (( $# > 0)); do
          ;;
       --kill)
          kill_statengine
-         exit 0
-         ;;
-      --check-daemon) 
-         check_daemon 
          exit 0
          ;;
       --output-file)

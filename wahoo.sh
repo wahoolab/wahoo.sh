@@ -31,33 +31,35 @@ function wahoo_status {
    fi
 }
 
-if [[ -z ${1} ]]; then
+if [[ -n ${1} ]]; then
+   COMMAND="${1}"
+else
+   COMMAND1=
    echo ""
    echo "Select an option."
    echo "-----------------"
    if [[ $(wahoo_status) == "STOPPED" ]]; then
       echo "1) Start"      
-      MENU_1=".wahoo-start.sh"
+      COMMAND1="start"
    else
       echo "1) Stop"
-      MENU_1=".wahoo-stop.sh"
+      COMMAND1="stop"
    fi
    printf "\n%s" "> "
    read MENU
    case ${MENU} in
       1) 
-         ${MENU_1} 
+         COMMAND=${COMMAND1}
          ;;
-      *) echo "foo" ;;
    esac
 fi
 
-exit 0
-
-case ${1} in  
+case "${COMMAND}" in
    "stop")
+      .wahoo-stop.sh
       ;; 
    "start")
+      .wahoo-start.sh
       ;;
    *) 
       error.sh "$0 - Command ${1} is not recognized. Try \"wahoo.sh --help\"." 

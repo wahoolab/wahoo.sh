@@ -6,7 +6,7 @@
 debug.sh -2 "$$ $(basename $0)"
 
 oracle-oswbb.sh
-statengine.sh --check-daemon 1> /dev/null
+statengine.sh --start 1> /dev/null
 monitor_reboots.sh
 
 exit 0
