@@ -4,7 +4,7 @@
 [[ -f .wahoo ]] && $(. .wahoo 2> /dev/null)
 [[ -f ~/.wahoo ]] && . ~/.wahoo
 
-debug.sh -2 "$0"
+debug.sh -2 "$$ $(basename $0)"
 
 function usage {
 cat <<EOF
@@ -95,7 +95,7 @@ TRIES=0
 AQUISITION="FAILED"
 
 p=0
-debug.sh -3 "MAX_PROCESSES=${MAX_PROCESSES}"
+debug.sh -3 "$$ MAX_PROCESSES=${MAX_PROCESSES}"
 if (( ${MAX_PROCESSES:-0} > 0 )); then
    ls *.trying 2> /dev/null | debug.sh -3
    cat *.trying 2> /dev/null | while read t; do
@@ -103,7 +103,7 @@ if (( ${MAX_PROCESSES:-0} > 0 )); then
       # We are only interested in counting active processes.
       (( ${t} > (($(time.sh epoch)-60)) )) && ((p=p+1))
    done
-   debug.sh -3 "p=${p}"
+   debug.sh -3 "$$ p=${p}"
    if (( ${p} >= ${MAX_PROCESSES} )); then
       error.sh "$0 - Too many processes are trying to aquire lock ${LOCK_KEY}." && exit 1
    fi
@@ -111,7 +111,7 @@ fi
 
 while ((1)); do
    ((TRIES=TRIES+1))
-   debug.sh -3 "TRIES=${TRIES}"
+   debug.sh -3 "$$ TRIES=${TRIES}"
    # Lock is available if there are no .lock files.
    if (( $(ls *.lock 2> /dev/null | wc -l) == 0 )); then
       echo ${EXPIRE_TIME} > $$.lock && AQUISITION="SUCCESSFUL" && break
@@ -121,13 +121,13 @@ while ((1)); do
       if (( ${EXPIRES} > 0 && ${EXPIRES} < $(time.sh epoch) )); then
          # Lock is expired, so we will remove it and log a message since the process that created it did not remove it.
          rm *.lock 2> /dev/null && echo ${EXPIRE_TIME} >> $$.lock && AQUISITION="EXPIRED" && break
-         wahoo.sh log "Aquisition of lock ${LOCK_KEY} succeeded because existing lock has expired."
+         debug.sh -2 "$$ Aquisition of lock ${LOCK_KEY} succeeded because existing lock has expired."
       fi
    fi
    if (( ${TRIES} >= ${MAX_TRIES} )); then
       if [[ -n "${GRAB_LOCK}" ]]; then
          rm *.lock 2> /dev/null && echo ${EXPIRE_TIME} >> $$.lock && AQUISITION="GRABBED"
-         wahoo.sh log "Aquisition of lock ${LOCK_KEY} was grabbed."
+         debug.sh -2 "$$ Aquisition of lock ${LOCK_KEY} was grabbed."
       fi
       break
    fi
@@ -140,11 +140,12 @@ if [[ ${AQUISITION} == "FAILED" ]]; then
    # Add a line to the fail.log so we can keep track of the # of consecutive failures.
    echo $(date) $* >> fail.log 
    EXIT_STATUS=1
-   wahoo.sh log "Aquisition of lock ${LOCK_KEY} failed."
+   
+   debug.sh -2 "$$ Aquisition of lock ${LOCK_KEY} failed."
    if (( ${FAILURE_LIMIT} > 0 )); then
       if (( $(wc -l fail.log | cut -d" " -f1) > ${FAILURE_LIMIT} )); then
          error.sh "$0 - Failure limit has been reached trying to aquire lock ${LOCK_KEY}."
-         wahoo.sh log "Failure limit has been reached trying to aquire lock ${LOCK_KEY}."
+         debug.sh -2 "$$ Failure limit has been reached trying to aquire lock ${LOCK_KEY}."
       fi
    fi
 else

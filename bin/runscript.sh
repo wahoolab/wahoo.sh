@@ -56,7 +56,7 @@ ${LINE1}
 $(cat ${SCRIPT})
 EOF
 ) >> ${WAHOO}/log/stderr
-wahoo.sh log "An error occurred while running ${SCRIPT} from runscript.sh."
+debug.sh -1 "$$ An error occurred while running ${SCRIPT} from runscript.sh."
 fi
 
 if [[ -s ${TMPFILE}.stdout ]]; then

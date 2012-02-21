@@ -5,6 +5,8 @@
 
 debug.sh -2 "$$ $(basename $0)"
 
+fire-event.sh "wahoo-stop"
+
 # Stop Oracle OS Watcher Black Box if it is installed.
 if [[ -d ${TMP}/oswbb ]]; then
    # If not running this will throw an error so we ignore.

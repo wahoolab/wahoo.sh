@@ -17,11 +17,12 @@ fi
 
 crevent.sh --key "5min" --schedule "0,5,10,15,20,25,30,35,40,45,55 * * * *"  --silent
 
-FILE=${WAHOO}/event/5min/.wahoo.sh
-if [[ ! -f ${FILE} ]]; then
-   echo ".wahoo-event-5min.sh" > ${FILE}
-   chmod 700 ${FILE}
-fi
+(
+cat <<EOF
+.wahoo-event-5min.sh
+EOF
+) > ${WAHOO}/event/5min/.wahoo.sh
+chmod 700 ${WAHOO}/event/5min/.wahoo.sh
 
 crevent.sh --key "10min" --schedule "0,10,20,30,40,50 * * * *" --silent
 crevent.sh --key "60min" --schedule "0 * * * *" --silent
